@@ -8,11 +8,11 @@
 class Transform{
 
 
-	void updateLocalTransform();
-	void updateGlobalTransform();
 
 public:
 
+	void updateLocalTransform();
+	void updateGlobalTransform();
 
 	Matrix4 globalTransform;
 	Matrix4 localTransform;

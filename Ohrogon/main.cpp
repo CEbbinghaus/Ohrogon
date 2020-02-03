@@ -10,7 +10,7 @@ int main() {
 	if (glfwInit() == false)
 		return -1;
 
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "Ohrogon Engine", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(1280, 1280, "Ohrogon Engine", nullptr, nullptr);
 
 	if (window == nullptr) {
 		glfwTerminate(); return -2;
@@ -45,6 +45,15 @@ int main() {
 		points[3] - 0.5 * Vector3::one(),
 	};
 
+	Vector3 movedVerticies[] = {
+		points[0] - 0.5 * Vector3::one(),
+		points[1] - 0.5 * Vector3::one(),
+		points[2] - 0.5 * Vector3::one(),
+		points[0] - 0.5 * Vector3::one(),
+		points[2] - 0.5 * Vector3::one(),
+		points[3] - 0.5 * Vector3::one(),
+	};
+
 	uint VAO;
 	uint VBO;
 
@@ -67,9 +76,26 @@ int main() {
 	t.Rotation = Vector3(0.f, 0.f, 0.f);
 
 
-
+	float f = 0.0f;
 
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+		f += 0.01;
+
+		t.Rotation = Vector3(0.f, 0.f, f);
+
+		t.updateLocalTransform();
+
+		for (int i = 0; i < 6; ++i) {
+			movedVerticies[i] = t.localTransform * Vector4(verticies[i]);
+		}
+
+
+
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vector3), &movedVerticies, GL_STATIC_DRAW);
+
+
 		glClearColor(0.30f, 0.30f, 0.40f, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
