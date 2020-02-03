@@ -14,7 +14,10 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+
+#Debugging Files
+*.pdb
+*.ilk
 
 # Fortran module files
 *.mod
@@ -24,9 +27,11 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
-*.exe
 *.out
 *.app
+
+.vs
+
+**/__TMP
