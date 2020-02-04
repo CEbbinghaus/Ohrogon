@@ -30,7 +30,7 @@ public:
 	}
 
 	Matrix4 getVPMatrix(){
-		return (Matrix4::FromPosition(position) * rotation) * Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
+		return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane) * (Matrix4::FromPosition(position) * rotation);
 	}
 };
 
