@@ -33,17 +33,17 @@ int main() {
 	auto minor = ogl_GetMinorVersion();
 	printf("Running OpenGL Version %i.%i\n", major, minor);
 
-	{
-		int x, y;
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		glfwGetWindowPos(window, &x, &y);
-		Window::Position.x = x;
-		Window::Position.y = y;
-		Window::Width = width;
-		Window::Height = height;
-		Window::aspectRatio = ((float)width / height);
-	}
+	//{
+	//	int x, y;
+	//	int width, height;
+	//	glfwGetWindowSize(window, &width, &height);
+	//	glfwGetWindowPos(window, &x, &y);
+	//	Window::Position.x = x;
+	//	Window::Position.y = y;
+	//	Window::Width = width;
+	//	Window::Height = height;
+	//	Window::aspectRatio = ((float)width / height);
+	//}
 
 	Shader shader("./Shaders/VertShader.glsl", "./Shaders/FragShader.glsl");
 
@@ -103,7 +103,7 @@ int main() {
 	cam.NearPlane = 0.1f;
 	cam.FarPlane = 50.0f;
 
-	cam.position.z = -1.0f;
+	cam.position.z = -5.0f;
 
 	Transform t;
 
@@ -120,31 +120,36 @@ int main() {
 
 	float f = 0.0f;
 
+	for (int i = 0; i < 6; ++i) {
+		Vector4 scaledVert = (cam.getVPMatrix() * t.localTransform) * Vector4(vertices[i]);
+		std::cout << scaledVert.x << " " << scaledVert.y << " " << scaledVert.z << std::endl;
+	}
+
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
-		{
-			int x, y;
-			int width, height;
-			glfwGetWindowSize(window, &width, &height);
-			glfwGetWindowPos(window, &x, &y);
-			Window::Position.x = x;
-			Window::Position.y = y;
-			Window::Width = width;
-			Window::Height = height;
-			Window::aspectRatio = ((float)width / height);
-		}
+		//{
+		//	int x, y;
+		//	int width, height;
+		//	glfwGetWindowSize(window, &width, &height);
+		//	glfwGetWindowPos(window, &x, &y);
+		//	Window::Position.x = x;
+		//	Window::Position.y = y;
+		//	Window::Width = width;
+		//	Window::Height = height;
+		//	Window::aspectRatio = ((float)width / height);
+		//}
 
 		f += 0.01f;
 
-		t.Rotation = Vector3(0.f, 0.f, 0.f);
+		t.Rotation = Vector3(0.f, f, 0.f);
 
 		t.updateLocalTransform();
 
-		//for (int i = 0; i < 6; ++i) {
-		//	movedVerticies[i] = t.localTransform * Vector4(verticies[i]);
-		//}
+		/*for (int i = 0; i < 6; ++i) {
+			std::cout << t.localTransform * Vector4(vertices[i]) << std::endl;
+		}*/
 
 		Matrix4 pv_M = cam.getVPMatrix();
-		Matrix4 mvp = Matrix4();//(t.localTransform * pv_M);
+		Matrix4 mvp = (pv_M * t.localTransform);
 		glUniformMatrix4fv(PVMatrixUniform, 1, false, pv_M);
 		glUniformMatrix4fv(ModelMatrixUniform, 1, false, mvp);
 
