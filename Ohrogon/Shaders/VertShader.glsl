@@ -9,7 +9,7 @@ struct BaseLight{
 
 layout(location = 0) in vec3 VertPos;
 
-uniform mat4 mvpMatrix;
+uniform mat4 MVPMatrix;
 uniform mat4 ModelMatrix;
 
 void main(){
