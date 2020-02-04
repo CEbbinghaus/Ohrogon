@@ -33,6 +33,7 @@
 *.app
 
 .vs
+.vscode
 
 _TMP
 Build
