@@ -58,29 +58,29 @@ int main() {
 
 	Vector3 vertices[] = {
 		points[0],
-		points[1],
 		points[2],
+		points[1],
 
 		points[0],
 		points[2],
 		points[3],
 	};
 
-	int indexs[6] = { 0, 1, 2, 0, 2, 3 };
+	//int indexs[6] = { 0, 1, 2, 0, 2, 3 };
 
 	uint VAO;
 	uint VBO;
-	uint IBO;
+	//uint IBO;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &IBO);
+	//glGenBuffers(1, &IBO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vector3), &vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(int), &indexs, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ARRAY_BUFFER, IBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(int), &indexs, GL_STATIC_DRAW);
 
 
 	glEnableVertexAttribArray(0);
@@ -90,11 +90,13 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glUseProgram(shader.ProgrammID);
+
 	glClearColor(0.30f, 0.30f, 0.40f, 1);
+	//glClearColor(0.0f, 0.0f, 0.0f, 0);
 
 
-	auto PVMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix");
-	auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
+	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix");
+	//auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
 
 	Camera cam;
 
@@ -103,27 +105,32 @@ int main() {
 	cam.NearPlane = 0.1f;
 	cam.FarPlane = 50.0f;
 
-	cam.position.z = -5.0f;
+	cam.position.z = -1.0f;
 
 	Transform t;
 
+	//t.Scale = Vector3::one() * 0.1;
+
 	t.updateLocalTransform();
 
-	//t.Rotation = Vector3(0.f, 0.f, 0.f);
-	cam.getProjectionMatrix().Print();
+	t.Position.z = -1.0f;
 
-	cam.getViewMatrix().Print();
+	////t.Rotation = Vector3(0.f, 0.f, 0.f);
+	//cam.getProjectionMatrix().Print();
+
+	//cam.getViewMatrix().Print();
+
+	//t.localTransform.Print();
+
+	/*(cam.getPVMatrix() * t.localTransform).Print();*/
 
 	t.localTransform.Print();
 
-	(cam.getVPMatrix() * t.localTransform).Print();
-
 	float f = 0.0f;
-
-	for (int i = 0; i < 6; ++i) {
-		Vector4 scaledVert = (cam.getVPMatrix() * t.localTransform) * Vector4(vertices[i]);
-		std::cout << scaledVert.x << " " << scaledVert.y << " " << scaledVert.z << std::endl;
-	}
+	//for (int i = 0; i < 6; ++i) {
+	//	Vector4 scaledVert = mvp * Vector4(vertices[i], 1.0f);
+	//	std::cout << scaledVert.x << " " << scaledVert.y << " " << scaledVert.z << std::endl;
+	//}
 
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
 		//{
@@ -144,14 +151,11 @@ int main() {
 
 		t.updateLocalTransform();
 
-		/*for (int i = 0; i < 6; ++i) {
-			std::cout << t.localTransform * Vector4(vertices[i]) << std::endl;
-		}*/
-
-		Matrix4 pv_M = cam.getVPMatrix();
+		Matrix4 pv_M = cam.getPVMatrix();
 		Matrix4 mvp = (pv_M * t.localTransform);
-		glUniformMatrix4fv(PVMatrixUniform, 1, false, pv_M);
-		glUniformMatrix4fv(ModelMatrixUniform, 1, false, mvp);
+
+		glUniformMatrix4fv(MVPMatrixUniform, 1, false, mvp);
+		//glUniformMatrix4fv(ModelMatrixUniform, 1, false, t.localTransform);
 
 
 
@@ -174,6 +178,7 @@ int main() {
 
 	glDeleteBuffers(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	//glDeleteBuffers(1, &IBO);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

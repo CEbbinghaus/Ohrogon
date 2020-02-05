@@ -29,7 +29,7 @@ public:
 		return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
 	}
 
-	Matrix4 getVPMatrix(){
+	Matrix4 getPVMatrix(){
 		return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane) * (Matrix4::FromPosition(position) * rotation);
 	}
 };
