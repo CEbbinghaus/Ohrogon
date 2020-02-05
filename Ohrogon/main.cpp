@@ -6,6 +6,7 @@
 #include "atyp_Transform.h"
 #include "Camera.h"
 #include "Window.h"
+#include "KeyManager.h"
 
 using uint = unsigned int;
 
@@ -33,6 +34,11 @@ int main() {
 	auto minor = ogl_GetMinorVersion();
 	printf("Running OpenGL Version %i.%i\n", major, minor);
 
+	KeyManager km = KeyManager::CreateKeyManager(window);
+
+
+	
+
 	//{
 	//	int x, y;
 	//	int width, height;
@@ -49,50 +55,47 @@ int main() {
 
 
 
-	Vector3 points[] = {
+	Vector3 verticies[] = {
 		Vector3(-.5f, -.5f, .0f),
 		Vector3(.5f, -.5f,  .0f),
 		Vector3(.5f, .5f,   .0f),
 		Vector3(-.5f, .5f,  .0f)
 	};
 
-	Vector3 vertices[] = {
-		points[0],
-		points[2],
-		points[1],
-
-		points[0],
-		points[2],
-		points[3],
-	};
-
-	//int indexs[6] = { 0, 1, 2, 0, 2, 3 };
+	uint indexs[6] = {
+		0, 1, 2,
+		0, 2, 3
+};
 
 	uint VAO;
 	uint VBO;
-	//uint IBO;
+	uint IBO;
 
 	glGenVertexArrays(1, &VAO);
+
 	glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &IBO);
+	glGenBuffers(1, &IBO);
 
 	glBindVertexArray(VAO);
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vector3), &vertices, GL_STATIC_DRAW);
-	//glBindBuffer(GL_ARRAY_BUFFER, IBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(int), &indexs, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vector3), &verticies, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), &indexs, GL_STATIC_DRAW);
 
 
-	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
+	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glUseProgram(shader.ProgrammID);
 
 	glClearColor(0.30f, 0.30f, 0.40f, 1);
-	//glClearColor(0.0f, 0.0f, 0.0f, 0);
 
 
 	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix");
@@ -125,14 +128,15 @@ int main() {
 	/*(cam.getPVMatrix() * t.localTransform).Print();*/
 
 	t.localTransform.Print();
-
 	float f = 0.0f;
 	//for (int i = 0; i < 6; ++i) {
 	//	Vector4 scaledVert = mvp * Vector4(vertices[i], 1.0f);
 	//	std::cout << scaledVert.x << " " << scaledVert.y << " " << scaledVert.z << std::endl;
 	//}
 
+
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//{
 		//	int x, y;
 		//	int width, height;
@@ -147,29 +151,30 @@ int main() {
 
 		f += 0.01f;
 
-		t.Rotation = Vector3(0.f, f, 0.f);
+		if (km['b'])printf("b");
+
+		t.Position.x = sin(f) * 2.0f;
+
+		t.Rotation = Vector3(0.f, 0.f, f);
 
 		t.updateLocalTransform();
 
 		Matrix4 pv_M = cam.getPVMatrix();
 		Matrix4 mvp = (pv_M * t.localTransform);
 
+		glBindVertexArray(VAO);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
 		glUniformMatrix4fv(MVPMatrixUniform, 1, false, mvp);
 		//glUniformMatrix4fv(ModelMatrixUniform, 1, false, t.localTransform);
 
 
 
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vector3), &vertices, GL_STATIC_DRAW);
-
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glBindVertexArray(VAO);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indexs);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
+		
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		
+		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
