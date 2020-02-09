@@ -66,18 +66,46 @@ int main() {
 	Shader shader("./Shaders/VertShader.glsl", "./Shaders/FragShader.glsl");
 
 
+	Vector3 vertices[] = {
+		Vector3(0.5f,  0.5f, -0.5f),  // front top right
+		Vector3(0.5f, -0.5f, -0.5f),  // front bottom right
+		Vector3(-0.5f, -0.5f, -0.5f),  // front bottom left
+		Vector3(-0.5f,  0.5f, -0.5f),  // front top left 
 
-	Vector3 verticies[] = {
-		Vector3(-.5f, -.5f, .0f),
-		Vector3(.5f, -.5f,  .0f),
-		Vector3(.5f, .5f,   .0f),
-		Vector3(-.5f, .5f,  .0f)
+		Vector3( 0.5f,  0.5f, 0.5f),  // back top right
+		Vector3( 0.5f, -0.5f, 0.5f),  // back bottom right
+		Vector3(-0.5f, -0.5f, 0.5f),  // back bottom left
+		Vector3(-0.5f,  0.5f, 0.5f)   // back top left 
 	};
+	//Vector3 verticies[] = {
+	//	Vector3(-.5f, -.5f, .0f),
+	//	Vector3(.5f, -.5f,  .0f),
+	//	Vector3(.5f, .5f,   .0f),
+	//	Vector3(-.5f, .5f,  .0f)
+	//};
+	uint indices[] = {
+		0, 1, 3,   // front first triangle
+		1, 2, 3,   // front second triangle
 
-	uint indexs[6] = {
+		4, 5, 7,   // back first triangle
+		5, 6, 7,    // back second triangle
+		
+		4, 5, 1,   // right first triangle
+		1, 0, 4,    // right second triangle
+
+		3, 2, 6,   // left first triangle
+		6, 7, 3,    // left second triangle
+
+		0, 3, 7,   // top first triangle
+		7, 4, 0,    // top second triangle
+
+		1, 2, 6,   // bottom first triangle
+		6, 5, 1    // bottom second triangle
+	};
+	/*uint indexs[6] = {
 		0, 1, 2,
 		0, 2, 3
-};
+	};*/
 
 	uint VAO;
 	uint VBO;
@@ -91,10 +119,10 @@ int main() {
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vector3), &verticies, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), &indexs, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
 
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
@@ -120,15 +148,13 @@ int main() {
 	cam.NearPlane = 0.1f;
 	cam.FarPlane = 50.0f;
 
-	cam.position.z = -1.0f;
-
 	Transform t;
 
 	//t.Scale = Vector3::one() * 0.1;
 
-	t.updateLocalTransform();
+	t.updateTransform();
 
-	t.Position.z = -1.0f;
+	t.Position.z = 1.0f;
 
 	////t.Rotation = Vector3(0.f, 0.f, 0.f);
 	//cam.getProjectionMatrix().Print();
@@ -139,7 +165,6 @@ int main() {
 
 	/*(cam.getPVMatrix() * t.localTransform).Print();*/
 
-	t.localTransform.Print();
 	float f = 0.0f;
 	//for (int i = 0; i < 6; ++i) {
 	//	Vector4 scaledVert = mvp * Vector4(vertices[i], 1.0f);
@@ -163,31 +188,51 @@ int main() {
 		//}
 		f += 0.01f;
 
-		if (Keyboard['w'])
-			cam.position.z += 0.1;
-
-		if (Keyboard['s'])
-			cam.position.z -= 0.1;
-
-		if (Keyboard['a'])
-			cam.position.x += 0.1;
-
-		if (Keyboard['d'])
-			cam.position.x -= 0.1;
-
-		//Mouse.GetDelta().Print();
 		camRotation += Mouse.GetDelta() * 0.01f;
 
-		cam.rotation = Vector3(camRotation.y, camRotation.x, 0);
+
+		cam.transform.Rotation = Vector3(camRotation.y, camRotation.x, 0);
+
+		Vector3 forward = cam.transform.forward();
+		Vector3 right = cam.transform.right();
+		Vector3 up = cam.transform.up();
+
+		forward.Print();
+
+		//printf("%f\n", forward.magnitude());
+
+
+
+		if (Keyboard['w'])
+			cam.transform.Position += -forward * 0.1;
+
+		if (Keyboard['s'])
+			cam.transform.Position += forward * 0.1;
+
+		if (Keyboard['a'])
+			cam.transform.Position += right * 0.1;
+
+		if (Keyboard['d'])
+			cam.transform.Position += -right * 0.1;
+
+		if (Keyboard[' '])
+			cam.transform.Position += up * 0.1;
+
+		if (Keyboard[KeyCode::LEFT_CONTROL])
+			cam.transform.Position += -up * 0.1;
+
+		cam.transform.Position.Print();
+
+		//Mouse.GetDelta().Print();
 
 		//t.Position.x = sin(f) * 2.0f;
 
 		//t.Rotation = Vector3(0.f, 0.f, f);
 
-		t.updateLocalTransform();
+		Matrix4 ModelTransform = t.updateTransform();
 
 		Matrix4 pv_M = cam.getPVMatrix();
-		Matrix4 mvp = (pv_M * t.localTransform);
+		Matrix4 mvp = (pv_M * ModelTransform);
 
 		glBindVertexArray(VAO);
 
@@ -199,7 +244,7 @@ int main() {
 
 
 		
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(uint), GL_UNSIGNED_INT, 0);
 		
 		glBindVertexArray(0);
 

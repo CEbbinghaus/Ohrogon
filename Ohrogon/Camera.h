@@ -2,6 +2,7 @@
 #include "atyp_Vector3.h"
 #include "atyp_Quaternion.h"
 #include "atyp_Matrix4.h"
+#include "atyp_Transform.h"
 
 enum class CameraType{
 	Orthographic,
@@ -17,12 +18,12 @@ public:
 
 	float aspectRatio = 1.0f;
 
-	Vector3 position;
-	Quaternion rotation;
+	Transform transform;
+	
 	CameraType type;
 	
 	Matrix4 getViewMatrix(){
-		return (Matrix4::FromPosition(position) * rotation);
+		return *(Matrix4*)&transform.updateTransform();
 	}
 
 	Matrix4 getProjectionMatrix(){
@@ -30,7 +31,7 @@ public:
 	}
 
 	Matrix4 getPVMatrix(){
-		return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane) * (Matrix4::FromPosition(position) * rotation);
+		return getProjectionMatrix() * getViewMatrix();
 	}
 };
 
