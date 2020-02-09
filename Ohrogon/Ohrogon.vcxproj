@@ -173,6 +173,7 @@
     <ClCompile Include="KeyManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MouseManager.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -180,6 +181,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="KeyManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MouseManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

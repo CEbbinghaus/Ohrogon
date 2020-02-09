@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Window.h"
 #include "KeyManager.h"
+#include "MouseManager.h"
 
 using uint = unsigned int;
 
@@ -34,8 +35,19 @@ int main() {
 	auto minor = ogl_GetMinorVersion();
 	printf("Running OpenGL Version %i.%i\n", major, minor);
 
-	KeyManager km = KeyManager::CreateKeyManager(window);
+	//turn VSync off
+	//glfwSwapInterval(0);
 
+	//Key Manager Initialization
+	KeyManager Keyboard = KeyManager::CreateKeyManager(window);
+
+	//Mouse Configuration Options
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	if (glfwRawMouseMotionSupported())
+		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+	//Mouse Initialization
+	MouseManager Mouse = MouseManager::CreateMouseManager(window);
 
 	
 
@@ -133,10 +145,11 @@ int main() {
 	//	Vector4 scaledVert = mvp * Vector4(vertices[i], 1.0f);
 	//	std::cout << scaledVert.x << " " << scaledVert.y << " " << scaledVert.z << std::endl;
 	//}
-
+	Vector2 camRotation;
 
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glfwPollEvents();
 		//{
 		//	int x, y;
 		//	int width, height;
@@ -148,14 +161,28 @@ int main() {
 		//	Window::Height = height;
 		//	Window::aspectRatio = ((float)width / height);
 		//}
-
 		f += 0.01f;
 
-		if (km['b'])printf("b");
+		if (Keyboard['w'])
+			cam.position.z += 0.1;
 
-		t.Position.x = sin(f) * 2.0f;
+		if (Keyboard['s'])
+			cam.position.z -= 0.1;
 
-		t.Rotation = Vector3(0.f, 0.f, f);
+		if (Keyboard['a'])
+			cam.position.x += 0.1;
+
+		if (Keyboard['d'])
+			cam.position.x -= 0.1;
+
+		//Mouse.GetDelta().Print();
+		camRotation += Mouse.GetDelta() * 0.01f;
+
+		cam.rotation = Vector3(camRotation.y, camRotation.x, 0);
+
+		//t.Position.x = sin(f) * 2.0f;
+
+		//t.Rotation = Vector3(0.f, 0.f, f);
 
 		t.updateLocalTransform();
 
@@ -177,9 +204,12 @@ int main() {
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
-		glfwPollEvents();
+		
+		MouseCallbackHelper::Callback(window);
 	}
 
+	Keyboard.DestroyKeyManager();
+	Mouse.DestroyMouseManager();
 
 	glDeleteBuffers(1, &VAO);
 	glDeleteBuffers(1, &VBO);
