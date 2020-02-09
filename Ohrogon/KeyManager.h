@@ -140,7 +140,7 @@ class KeyManager{
 
 		KeyManager::Instance->data[key] = action != GLFW_RELEASE;
 
-		printf("%d, %c, %s\n", key, key, (action == GLFW_RELEASE ? "Up" : "Down"));
+		//printf("%d, %c, %s\n", key, key, (action == GLFW_RELEASE ? "Up" : "Down"));
 	}
 
 public:

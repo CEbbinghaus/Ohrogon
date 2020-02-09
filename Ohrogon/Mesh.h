@@ -1,5 +1,6 @@
 #pragma once
 #include <atyp_Vector3.h>
+#include <atyp_Transform.h>
 
 class Mesh{
 	int ItemCount;
@@ -11,4 +12,6 @@ class Mesh{
 
 	int* indicies;
 	int indexLength;
+
+	Transform transform;
 };
