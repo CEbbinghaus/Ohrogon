@@ -182,6 +182,7 @@
     <ClInclude Include="KeyManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MouseManager.h" />
+    <ClInclude Include="Primitive.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
