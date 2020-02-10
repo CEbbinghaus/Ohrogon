@@ -1,33 +1,40 @@
 #include <gl_core_4_5.h>
 #include <glfw3.h>
 #include <iostream>
+#include <glm.hpp>
+#include <ext.hpp>
 //#include <atyp_All.h>
+#include <atyp_Transform.h>
+#include <atyp_Math.h>
+#include <atyp_Array.h>
+
 #include "Shader.h"
-#include "atyp_Transform.h"
 #include "Camera.h"
 #include "Window.h"
 #include "KeyManager.h"
 #include "MouseManager.h"
-#include <atyp_Math.h>
+#include "Mesh.h"
 
 using uint = unsigned int;
 
-Vector3* generatePlane(int lod, int& vertCount){
-	Vector3* points = new Vector3[(lod + 1) * (lod + 1)];
+Array<Vector3> generatePlane(int lod){
+
+	Array points = Array<Vector3>((lod + 1) * (lod + 1));
+
 	for(int x = 0; x <= lod; ++x){
 		for(int y = 0; y <= lod; ++y){
 			points[x * (lod + 1) + y] = Vector3(x / (float)lod, 0.0f, y / (float)lod);
 		}
 	}
-	vertCount = (lod + 1) * (lod + 1);
+
 	return points;
 }
 
-uint* triangulatePlane(Vector3* verticies, int lod, int& indxCount){
+Array<uint> triangulatePlane(Array<Vector3> verticies, int lod){
+
 	uint indexSize = lod * lod * 6;
-	uint* indices = new uint[indexSize];
-	memset(indices, -1, indexSize * sizeof(uint));
-	indxCount = indexSize;
+	Array<uint> indices = Array<uint>(indexSize);
+
 	int index = 0;
 	for(int x = 0; x < lod; ++x){
 		for(int y = 0; y < lod; ++y){
@@ -106,10 +113,12 @@ int main() {
 
 	int lod = 50;
 
-	int vertCount, indxCount;
+	//Array<Vector3> verts = generatePlane(lod);
+	//Array<uint> indxs = triangulatePlane(verts, lod);
 
-	Vector3* verts = generatePlane(lod, vertCount);
-	uint* indxs = triangulatePlane(verts, lod, indxCount);
+	Mesh msh = Mesh();
+	msh.SetVerticies(generatePlane(lod));
+	msh.SetIndices(triangulatePlane(msh.Verticies, lod));
 
 	//Vector3 vertices[] = {
 	//	Vector3(0.5f,  0.5f, -0.5f),  // front top right
@@ -142,36 +151,35 @@ int main() {
 	//	//6, 5, 1    // bottom second triangle
 	//};
 
-	uint VAO;
-	uint VBO;
-	uint IBO;
+	//uint VAO;
+	//uint VBO;
+	//uint IBO;
 
-	glGenVertexArrays(1, &VAO);
+	//glGenVertexArrays(1, &msh.VAO);
 
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &IBO);
+	//glGenBuffers(1, &msh.VBO);
+	//glGenBuffers(1, &msh.IBO);
 
-	glBindVertexArray(VAO);
+	//glBindVertexArray(msh.VAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertCount * sizeof(Vector3), verts, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ARRAY_BUFFER, msh.VBO);
+	//glBufferData(GL_ARRAY_BUFFER, msh.Verticies.length * sizeof(Vector3), msh.Verticies.data(), GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indxCount * sizeof(uint), indxs, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, msh.IBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, msh.Indices.length * sizeof(uint), msh.Indices.data(), GL_STATIC_DRAW);
 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
-	glEnableVertexAttribArray(0);
+	//glvertexattribpointer(0, 3, gl_float, gl_false, sizeof(vector3), 0);
+	//glenablevertexattribarray(0);
 
-	glBindVertexArray(0);
+	//glbindvertexarray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glUseProgram(shader.ProgrammID);
 
 	glClearColor(0.30f, 0.30f, 0.40f, 1);
-
 
 	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix");
 	//auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
@@ -183,15 +191,13 @@ int main() {
 	cam.NearPlane = 0.01f;
 	cam.FarPlane = 100000.0f;
 
-	Transform t;
+	//Transform t;
 
-	t.Scale = Vector3::one() * 10;
-
-	t.updateTransform();
+	msh.transform.Scale = Vector3::one() * 10;
 
 	//t.Position.z = -1.0f;
 
-	t.Position = Vector3(-.5f, 0, -.5f);
+	msh.transform.Position = Vector3(-.5f, 0, -.5f);
 
 	////t.Rotation = Vector3(0.f, 0.f, 0.f);
 	//cam.getProjectionMatrix().Print();
@@ -207,7 +213,7 @@ int main() {
 	//	Vector4 scaledVert = mvp * Vector4(vertices[i], 1.0f);
 	//	std::cout << scaledVert.x << " " << scaledVert.y << " " << scaledVert.z << std::endl;
 	//}
-	Vector2 camRotation(1.5708f, 0.0f);
+	Vector2 camRotation(0.0f, 0.0f);
 
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -224,21 +230,39 @@ int main() {
 		//	Window::aspectRatio = ((float)width / height);
 		//}
 		f += 0.01f;
+
+		Vector2 offset;
+
+		if(f > 1.0f)
+			camRotation = Mouse.GetDelta() * 0.005f;
+
+		//Quaternion CameraSpace =  * cam.transform.Rotation;
+
+		//auto rotation = Matrix4();
+		//// Left / Right rotation
+		//rotation = rotation * Quaternion::aroundAngle(cam.transform.up(), float(-camRotation.x));
+		//// Up / Down rotation
+		//rotation = rotation * Quaternion::aroundAngle(Vector3::right(), float(-camRotation.x));
+
+		cam.transform.Rotation;
+
+		cam.transform.Rotation.Print();
 		
-		camRotation += Mouse.GetDelta() * 0.01f;
+		//camRotation.y = Math::clamp(camRotation.y, -1.7f, 1.7f);
+		//cam.transform.Rotation = Quaternion::euler(camRotation.y, camRotation.x, 0.0f);// *YRot;
 
 		//camRotation.y = Math::clamp(camRotation.y, 0.0f, 90.0f);
+		
 
 		Vector3 forward = cam.transform.forward();
 		Vector3 right = cam.transform.right();
 		Vector3 up = Vector3::up();//cam.transform.up();
 
-		Quaternion YRot = Quaternion::euler(0, camRotation.x, 0);
-		Quaternion XRot = Quaternion::aroundAngle(YRot.toMatrix().XAxis, camRotation.y);
+		/*Quaternion YRot = Quaternion::euler(0, camRotation.x, 0);
+		Quaternion XRot = Quaternion::aroundAngle(YRot.toMatrix().XAxis, camRotation.y);*/
 
-		YRot.toMatrix().XAxis.Print();
+		//XRot.Print();
 
-		cam.transform.Rotation = XRot * YRot;
 
 
 		//camRotation.Print();
@@ -273,44 +297,39 @@ int main() {
 
 		//t.Rotation = Vector3(0.f, f, 0.f);
 
-		Matrix4 ModelTransform = t.updateTransform();
+		//Matrix4 ModelTransform = t.updateTransform();
 
 		Matrix4 pv_M = cam.getPVMatrix();
-		Matrix4 mvp = (pv_M * ModelTransform);
+		//Matrix4 mvp = (pv_M * ModelTransform);
 
-		glBindVertexArray(VAO);
+	/*	glBindVertexArray(msh.VAO);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, msh.IBO);*/
 
-		glUniformMatrix4fv(MVPMatrixUniform, 1, false, mvp);
+		//glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M);
 		//glUniformMatrix4fv(ModelMatrixUniform, 1, false, t.localTransform);
 
-		glPolygonMode(GL_FRONT, GL_FILL);
+	/*	glPolygonMode(GL_FRONT, GL_FILL);
 
-		glDrawElements(GL_TRIANGLES, indxCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, msh.Indices.length, GL_UNSIGNED_INT, 0);
 		
 		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		glDrawElements(GL_TRIANGLES, indxCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, msh.Indices.length, GL_UNSIGNED_INT, 0);
 
 
-		glBindVertexArray(0);
+		glBindVertexArray(0);*/
+
+		msh.draw(MVPMatrixUniform, pv_M);
 
 		glfwSwapBuffers(window);
 		
 		MouseCallbackHelper::Callback(window);
 	}
 
-	delete[] verts;
-	delete[] indxs;
-
 	Keyboard.DestroyKeyManager();
 	Mouse.DestroyMouseManager();
-
-	glDeleteBuffers(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	//glDeleteBuffers(1, &IBO);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
