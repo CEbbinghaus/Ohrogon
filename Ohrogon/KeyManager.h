@@ -138,7 +138,7 @@ class KeyManager{
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 		if(KeyManager::Instance == nullptr)return;
 
-		KeyManager::Instance->data[key] = action != GLFW_RELEASE;
+		KeyManager::Instance->data[key] = action;
 
 		//printf("%d, %c, %s\n", key, key, (action == GLFW_RELEASE ? "Up" : "Down"));
 	}
