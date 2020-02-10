@@ -124,6 +124,18 @@ public:
 		success = GL_FALSE;
 		glGetProgramiv(ProgrammID, GL_LINK_STATUS, &success);
 		if(!success){
+
+			GLint maxLength = 0;
+			glGetProgramiv(ProgrammID, GL_INFO_LOG_LENGTH, &maxLength);
+
+			// The maxLength includes the NULL character
+			char* errorLog = new char[maxLength];
+			glGetProgramInfoLog(ProgrammID, maxLength, &maxLength, errorLog);
+
+			printf(errorLog);
+			free(errorLog);
+
+
 			throw std::exception("Cannot Link Shaders");
 		}
 	}
