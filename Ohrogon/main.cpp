@@ -3,6 +3,7 @@
 #include <iostream>
 #include <glm.hpp>
 #include <ext.hpp>
+#include <chrono>
 //#include <atyp_All.h>
 #include <atyp_Transform.h>
 #include <atyp_Math.h>
@@ -15,9 +16,10 @@
 #include "MouseManager.h"
 #include "Mesh.h"
 #include "Primitive.h"
+#include "Time.h"
 
 using uint = unsigned int;
-
+using Clock = std::chrono::steady_clock;
 
 int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -79,6 +81,8 @@ int main() {
 	Mesh plane = Primitive::Plane(20);
 	Mesh cylinder = Primitive::Cylinder(.5f, 1.0f, 6);
 
+	Clock clock = Clock();
+	
 	//Vector3 vertices[] = {
 	//	Vector3(0.5f,  0.5f, -0.5f),  // front top right
 	//	Vector3(0.5f, -0.5f, -0.5f),  // front bottom right
@@ -124,29 +128,20 @@ int main() {
 	cam.NearPlane = 0.01f;
 	cam.FarPlane = 100000.0f;
 
-	//Transform t;
-
 	plane.transform.Scale = Vector3::one() * 10;
-	plane.transform.Position = Vector3(0.0f, 0, -.5f);
-
-	//t.Position.z = -1.0f;
-
-
-	////t.Rotation = Vector3(0.f, 0.f, 0.f);
-	//cam.getProjectionMatrix().Print();
-
-	//cam.getViewMatrix().Print();
-
-	//t.localTransform.Print();
-
-	/*(cam.getPVMatrix() * t.localTransform).Print();*/
+	plane.transform.Position = Vector3(-.5f, 0, -.5f);
 
 	float f = 0.0f;
 	Vector2 camRotation(0.0f, 0.0f);
 
+
+
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
+
+		Time::Update();
+
 
 		//{
 		//	int x, y;
@@ -164,83 +159,42 @@ int main() {
 
 		Vector2 offset;
 
-		if(f > 0.5f)
-			camRotation += Mouse.GetDelta() * 0.005f;
+		if (f > 0.5f)
+			camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
+
 		
+		camRotation.y = Math::clamp(camRotation.y, -1.2f,1.2f);
 
-		plane.transform.Rotation = Quaternion::euler(0.0f, f, 0.0f);
+		cam.transform.Rotation = Quaternion::euler(camRotation.y, camRotation.x, 0.0f);
 
-		//Quaternion CameraSpace =  * cam.transform.Rotation;
 
-		//auto rotation = Matrix4();
-		//// Left / Right rotation
-		//rotation = rotation * Quaternion::aroundAngle(cam.transform.up(), float(-camRotation.x));
-		//// Up / Down rotation
-		//rotation = rotation * Quaternion::aroundAngle(Vector3::right(), float(-camRotation.x));
-
-		cam.transform.Rotation;
-
-		//cam.transform.Rotation.Print();
+		Vector3 forward = cam.transform.forward();
+		Vector3 right = cam.transform.right();
+		Vector3 up = Vector3::up();
 		
-		//camRotation.y = Math::clamp(camRotation.y, -1.7f, 1.7f);
-		Quaternion XRotation = Quaternion::euler(0.0f, camRotation.x, 0.0f);// *YRot;
-		//Quaternion YRotation = Quaternion::aroundAngle(XRotation.toMatrix().ZAxis, camRotation.y);
-		cam.transform.Rotation = XRotation;// *YRotation;
-
-		//camRotation.y = Math::clamp(camRotation.y, 0.0f, 90.0f);
-		
-		Matrix4 t = XRotation.toMatrix();
-
-		Vector3 forward = t.ZAxis;
-		Vector3 right = t.XAxis;
-		Vector3 up = Vector3::up();//cam.transform.up();
-
-		/*Quaternion YRot = Quaternion::euler(0, camRotation.x, 0);
-		Quaternion XRot = Quaternion::aroundAngle(YRot.toMatrix().XAxis, camRotation.y);*/
-
-		//XRot.Print();
-
-
-
-		//camRotation.Print();
-
-		//printf("%f\n", forward.magnitude());
-
-		glm::inverse(glm::mat4(1.0f));
-
+		Vector3 movement;
 
 		if (Keyboard['w'])
-			cam.transform.Position += forward * 0.1;
+			movement += forward * 0.1;
 
 		if (Keyboard['s'])
-			cam.transform.Position += -forward * 0.1;
+			movement += -forward * 0.1;
 
 		if (Keyboard['d'])
-			cam.transform.Position += -right * 0.1;
+			movement += -right * 0.1;
 
 		if (Keyboard['a'])
-			cam.transform.Position += right * 0.1;
+			movement += right * 0.1;
 
 		if (Keyboard[' '])
-			cam.transform.Position += up * 0.1;
+			movement += up * 0.1;
 
 		if (Keyboard[KeyCode::LEFT_CONTROL])
-			cam.transform.Position += -up * 0.1;
+			movement += -up * 0.1;
 
-
-		cam.transform.Position.Print();
-		//cam.transform.Position.Print();
-
-		//Mouse.GetDelta().Print();
-
-		//t.Position.x = sin(f) * 2.0f;
-
-		//t.Rotation = Vector3(0.f, f, 0.f);
-
-		//Matrix4 ModelTransform = t.updateTransform();
+		cam.transform.Position += movement * Time::OneTime;
 
 		Matrix4 pv_M = cam.getPVMatrix();
-		//Matrix4 mvp = (pv_M * ModelTransform);
 
 		plane.draw(MVPMatrixUniform, pv_M);
 

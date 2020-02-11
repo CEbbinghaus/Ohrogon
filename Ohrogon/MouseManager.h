@@ -30,8 +30,8 @@ class MouseManager
 
 			*(Instance->lastPos) = *Instance->pos;
 		*/
-		Instance->delta->x = (float)xpos - Instance->pos->x;
-		Instance->delta->y = (float)ypos - Instance->pos->y;
+		Instance->delta->x = Instance->pos->x - (float)xpos;
+		Instance->delta->y = Instance->pos->y - (float)ypos;
 
 		Instance->pos->x = (float)xpos;
 		Instance->pos->y = (float)ypos;

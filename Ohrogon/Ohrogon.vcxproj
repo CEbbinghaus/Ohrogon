@@ -184,6 +184,7 @@
     <ClInclude Include="MouseManager.h" />
     <ClInclude Include="Primitive.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Time.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
