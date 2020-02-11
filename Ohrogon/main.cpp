@@ -76,8 +76,8 @@ int main() {
 	//Array<Vector3> verts = generatePlane(lod);
 	//Array<uint> indxs = triangulatePlane(verts, lod);
 
-	Mesh plane = Primitive::Plane(50);
-	Mesh cylinder = Primitive::Cylinder(.5f, 1.0f, 20);
+	Mesh plane = Primitive::Plane(20);
+	Mesh cylinder = Primitive::Cylinder(.5f, 1.0f, 6);
 
 	//Vector3 vertices[] = {
 	//	Vector3(0.5f,  0.5f, -0.5f),  // front top right
@@ -127,7 +127,7 @@ int main() {
 	//Transform t;
 
 	plane.transform.Scale = Vector3::one() * 10;
-	plane.transform.Position = Vector3(-.5f, 0, -.5f);
+	plane.transform.Position = Vector3(0.0f, 0, -.5f);
 
 	//t.Position.z = -1.0f;
 
@@ -164,8 +164,11 @@ int main() {
 
 		Vector2 offset;
 
-		if(f > 1.0f)
-			camRotation = Mouse.GetDelta() * 0.005f;
+		if(f > 0.5f)
+			camRotation += Mouse.GetDelta() * 0.005f;
+		
+
+		plane.transform.Rotation = Quaternion::euler(0.0f, f, 0.0f);
 
 		//Quaternion CameraSpace =  * cam.transform.Rotation;
 
@@ -177,16 +180,19 @@ int main() {
 
 		cam.transform.Rotation;
 
-		cam.transform.Rotation.Print();
+		//cam.transform.Rotation.Print();
 		
 		//camRotation.y = Math::clamp(camRotation.y, -1.7f, 1.7f);
-		//cam.transform.Rotation = Quaternion::euler(camRotation.y, camRotation.x, 0.0f);// *YRot;
+		Quaternion XRotation = Quaternion::euler(0.0f, camRotation.x, 0.0f);// *YRot;
+		//Quaternion YRotation = Quaternion::aroundAngle(XRotation.toMatrix().ZAxis, camRotation.y);
+		cam.transform.Rotation = XRotation;// *YRotation;
 
 		//camRotation.y = Math::clamp(camRotation.y, 0.0f, 90.0f);
 		
+		Matrix4 t = XRotation.toMatrix();
 
-		Vector3 forward = cam.transform.forward();
-		Vector3 right = cam.transform.right();
+		Vector3 forward = t.ZAxis;
+		Vector3 right = t.XAxis;
 		Vector3 up = Vector3::up();//cam.transform.up();
 
 		/*Quaternion YRot = Quaternion::euler(0, camRotation.x, 0);
@@ -200,6 +206,7 @@ int main() {
 
 		//printf("%f\n", forward.magnitude());
 
+		glm::inverse(glm::mat4(1.0f));
 
 
 		if (Keyboard['w'])
@@ -209,10 +216,10 @@ int main() {
 			cam.transform.Position += -forward * 0.1;
 
 		if (Keyboard['d'])
-			cam.transform.Position += right * 0.1;
+			cam.transform.Position += -right * 0.1;
 
 		if (Keyboard['a'])
-			cam.transform.Position += -right * 0.1;
+			cam.transform.Position += right * 0.1;
 
 		if (Keyboard[' '])
 			cam.transform.Position += up * 0.1;
@@ -220,6 +227,8 @@ int main() {
 		if (Keyboard[KeyCode::LEFT_CONTROL])
 			cam.transform.Position += -up * 0.1;
 
+
+		cam.transform.Position.Print();
 		//cam.transform.Position.Print();
 
 		//Mouse.GetDelta().Print();
