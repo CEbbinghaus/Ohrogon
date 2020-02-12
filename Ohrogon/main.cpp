@@ -1,8 +1,6 @@
 #include <gl_core_4_5.h>
 #include <glfw3.h>
 #include <iostream>
-#include <glm.hpp>
-#include <ext.hpp>
 #include <chrono>
 //#include <atyp_All.h>
 #include <atyp_Transform.h>
@@ -49,7 +47,7 @@ int main() {
 	//glfwSwapInterval(0);
 
 	//Key Manager Initialization
-	KeyManager Keyboard = KeyManager::CreateKeyManager(window);
+	KeyManager& Keyboard = KeyManager::CreateKeyManager(window);
 
 	//Mouse Configuration Options
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -78,41 +76,13 @@ int main() {
 	//Array<Vector3> verts = generatePlane(lod);
 	//Array<uint> indxs = triangulatePlane(verts, lod);
 
-	Mesh plane = Primitive::Plane(20);
-	Mesh cylinder = Primitive::Cylinder(.5f, 1.0f, 6);
+	//Mesh plane = Primitive::Plane(1);
+	//Mesh cylinder = Primitive::Cylinder(20);
+	Mesh cube = Primitive::Cube();
+	cube.RecalculateNormals();
 
 	Clock clock = Clock();
 	
-	//Vector3 vertices[] = {
-	//	Vector3(0.5f,  0.5f, -0.5f),  // front top right
-	//	Vector3(0.5f, -0.5f, -0.5f),  // front bottom right
-	//	Vector3(-0.5f, -0.5f, -0.5f),  // front bottom left
-	//	Vector3(-0.5f,  0.5f, -0.5f),  // front top left 
-
-	//	Vector3( 0.5f,  0.5f, 0.5f),  // back top right
-	//	Vector3( 0.5f, -0.5f, 0.5f),  // back bottom right
-	//	Vector3(-0.5f, -0.5f, 0.5f),  // back bottom left
-	//	Vector3(-0.5f,  0.5f, 0.5f)   // back top left 
-	//};
-	//uint indices[] = {
-	//	0, 1, 3,   // front first triangle
-	//	1, 2, 3,   // front second triangle
-
-	//	//4, 5, 7,   // back first triangle
-	//	//5, 6, 7,    // back second triangle
-	//	//
-	//	//4, 5, 1,   // right first triangle
-	//	//1, 0, 4,    // right second triangle
-
-	//	//3, 2, 6,   // left first triangle
-	//	//6, 7, 3,    // left second triangle
-
-	//	//0, 3, 7,   // top first triangle
-	//	//7, 4, 0,    // top second triangle
-
-	//	//1, 2, 6,   // bottom first triangle
-	//	//6, 5, 1    // bottom second triangle
-	//};
 
 	glUseProgram(shader.ProgrammID);
 
@@ -128,13 +98,15 @@ int main() {
 	cam.NearPlane = 0.01f;
 	cam.FarPlane = 100000.0f;
 
-	plane.transform.Scale = Vector3::one() * 10;
-	plane.transform.Position = Vector3(-.5f, 0, -.5f);
+	//plane.transform.Scale = Vector3::one() * 10;
+	//plane.transform.Position = Vector3(-.5f, 0, -.5f);
 
 	float f = 0.0f;
 	Vector2 camRotation(0.0f, 0.0f);
 
-
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT, GL_FILL);
 
 	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -156,8 +128,6 @@ int main() {
 		//}
 
 		f += 0.01f;
-
-		Vector2 offset;
 
 		if (f > 0.5f)
 			camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
@@ -192,13 +162,26 @@ int main() {
 		if (Keyboard[KeyCode::LEFT_CONTROL])
 			movement += -up * 0.1;
 
+		if(Keyboard['m']){
+			glEnable(GL_CULL_FACE);
+			glPolygonMode(GL_FRONT, GL_FILL);
+		}
+
+		if(Keyboard['l']){
+			glDisable(GL_CULL_FACE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+
+
 		cam.transform.Position += movement * Time::OneTime;
 
 		Matrix4 pv_M = cam.getPVMatrix();
 
-		plane.draw(MVPMatrixUniform, pv_M);
+		//plane.draw(MVPMatrixUniform, pv_M);
 
-		cylinder.draw(MVPMatrixUniform, pv_M);
+		//cylinder.draw(MVPMatrixUniform, pv_M);
+
+		cube.draw(MVPMatrixUniform, pv_M);
 
 		glfwSwapBuffers(window);
 		

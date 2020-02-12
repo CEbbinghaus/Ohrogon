@@ -13,7 +13,7 @@ public:
 
 		for (int x = 0; x <= faces; ++x) {
 			for (int y = 0; y <= faces; ++y) {
-				verts[x * (faces + 1) + y] = Vector3(x / (float)faces, 0.0f, y / (float)faces);
+				verts[x * (faces + 1) + y] = Vector3((x / (float)faces) - 0.5f, 0.0f, (y / (float)faces) - 0.5f);
 			}
 		}
 
@@ -40,20 +40,20 @@ public:
 		return Mesh(verts, indices);
 	}
 
-	static Mesh Cylinder(float radius, float halfLength, int slices)
+	static Mesh Cylinder(int slices)
     {
         Array<Vector3> vertices;
         Array<uint> indices;
 
-        vertices.push(Vector3(0.0f, halfLength, 0.0f));
-        vertices.push(Vector3(0.0f, -halfLength, 0.0f));
+        vertices.push(Vector3(0.0f, 0.5f, 0.0f));
+        vertices.push(Vector3(0.0f, -0.5f, 0.0f));
 
         for (int i = 0; i < slices; i++)
         {
             float theta = Math::TWO_PI() * ((float)i / slices);
 
-            vertices.push(Vector3(radius * glm::cos(theta), halfLength, radius * glm::sin(theta)));
-            vertices.push(Vector3(radius * glm::cos(theta), -halfLength, radius * glm::sin(theta)));
+            vertices.push(Vector3(cos(theta) * 0.5f, 0.5f, sin(theta) * 0.5f));
+            vertices.push(Vector3(cos(theta) * 0.5f, -0.5f, sin(theta) * 0.5f));
         }
 
         for (int i = 2; i < vertices.size() - 2; i += 2)
@@ -92,5 +92,40 @@ public:
         indices.push(vertices.size() - 1);
 
         return Mesh(vertices, indices);
+    }
+
+    static Mesh Cube(){
+		Array<Vector3> vertices = {
+			Vector3(0.5f,  0.5f, -0.5f),  // front top right
+			Vector3(0.5f, -0.5f, -0.5f),  // front bottom right
+			Vector3(-0.5f, -0.5f, -0.5f),  // front bottom left
+			Vector3(-0.5f,  0.5f, -0.5f),  // front top left 
+
+			Vector3( 0.5f,  0.5f, 0.5f),  // back top right
+			Vector3( 0.5f, -0.5f, 0.5f),  // back bottom right
+			Vector3(-0.5f, -0.5f, 0.5f),  // back bottom left
+			Vector3(-0.5f,  0.5f, 0.5f)   // back top left 
+		};
+
+		Array<uint> indices = {
+			0, 1, 3,   // front first triangle
+			1, 2, 3,   // front second triangle
+
+			4, 7, 5,   // back first triangle
+			5, 7, 6,    // back second triangle
+		
+			4, 5, 1,   // right first triangle
+			1, 0, 4,    // right second triangle
+
+			3, 2, 6,   // left first triangle
+			6, 7, 3,    // left second triangle
+
+			0, 3, 7,   // top first triangle
+			7, 4, 0,    // top second triangle
+
+			1, 6, 2,   // bottom first triangle
+			6, 1, 5    // bottom second triangle
+		};
+		return Mesh(vertices, indices);
     }
 };

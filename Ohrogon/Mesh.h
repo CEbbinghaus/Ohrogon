@@ -102,16 +102,42 @@ public:
 		glUniformMatrix4fv(MVPMatrixUniform, 1, false, ProjectionView * transform.updateTransform());
 		//glUniformMatrix4fv(ModelMatrixUniform, 1, false, t.localTransform);
 
-		glPolygonMode(GL_FRONT, GL_FILL);
+		/*glPolygonMode(GL_FRONT, GL_FILL);
 
 		glDrawElements(GL_TRIANGLES, Indices.length, GL_UNSIGNED_INT, 0);
 
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
 
 		glDrawElements(GL_TRIANGLES, Indices.length, GL_UNSIGNED_INT, 0);
 
 
 		glBindVertexArray(0);
+	}
+
+	void RecalculateNormals(){
+		Array<Vector3> normals(Verticies.length);
+
+		normals.map([](Vector3 vector, int index){
+			return Vector3();
+		});
+
+		for(int i = 0; i < Indices.length; i += 3){
+			int a = Indices[i];
+			int b = Indices[i + 1];
+			int c = Indices[i + 2];
+
+			Vector3 Normal = Vector3::FaceNormal(Verticies[a], Verticies[b], Verticies[c]);
+
+			normals[a] += Normal;
+			normals[b] += Normal;
+			normals[c] += Normal;
+		}
+
+		normals.forEach([](Vector3 Element, int index){
+			Element.normalise();
+		});
+
+		Normals = normals;
 	}
 };

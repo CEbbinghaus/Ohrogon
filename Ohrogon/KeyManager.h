@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <glfw3.h>
-#include <map>
+#include <stdio.h>
+#include <memory>
 
 enum class KeyCode {
 	UNKNOWN = GLFW_KEY_UNKNOWN,
@@ -127,9 +128,12 @@ enum class KeyCode {
 	LAST = GLFW_KEY_LAST
 };
 
-
 class KeyManager{
 	bool* data;
+
+	bool ctrlKey;
+	bool shiftKey;
+	bool altKey;
 
 	static KeyManager* Instance;
 
@@ -140,22 +144,27 @@ class KeyManager{
 
 		KeyManager::Instance->data[key] = action;
 
-		//printf("%d, %c, %s\n", key, key, (action == GLFW_RELEASE ? "Up" : "Down"));
+		KeyManager::Instance->ctrlKey = mods & GLFW_MOD_CONTROL;
+		KeyManager::Instance->altKey = mods & GLFW_MOD_ALT;
+		KeyManager::Instance->shiftKey = mods & GLFW_MOD_SHIFT;
+	}
+
+	KeyManager(GLFWwindow* window){
+		data = new bool[GLFW_KEY_LAST + 1];
+		memset(data, 0, GLFW_KEY_LAST + 1 * sizeof(bool));
+
+		this->window = window;
 	}
 
 public:
-
+	KeyManager(KeyManager const&) = delete;
+	void operator=(KeyManager const&) = delete;
 
 	static KeyManager& CreateKeyManager(GLFWwindow* window) {
 		if (Instance != nullptr)
 			return *Instance;
 
-		Instance = new KeyManager();
-
-		Instance->data = new bool[GLFW_KEY_LAST + 1];
-		memset(Instance->data, 0, GLFW_KEY_LAST + 1 * sizeof(bool));
-
-		Instance->window = window;
+		Instance = new KeyManager(window);
 
 		glfwSetKeyCallback(window, &(KeyManager::keyCallback));
 
