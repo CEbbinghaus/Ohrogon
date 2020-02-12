@@ -6,7 +6,7 @@
 
 using uint = unsigned int;
 
-class Mesh{
+class Mesh {
 public:
 
 	uint VAO;
@@ -44,7 +44,7 @@ public:
 		glBindVertexArray(0);
 	}
 
-	Mesh(Array<Vector3> verts, Array<uint> indxs): Verticies(verts), Indices(indxs) {
+	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Verticies(verts), Indices(indxs) {
 
 		glGenVertexArrays(1, &VAO);
 
@@ -53,15 +53,10 @@ public:
 
 		glBindVertexArray(VAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, Verticies.length * sizeof(Vector3), Verticies.data(), GL_STATIC_DRAW);
+		BindVerticies();
+		UpdateVertexAttributes();
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.length * sizeof(uint), Indices.data(), GL_STATIC_DRAW);
-
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
-		glEnableVertexAttribArray(0);
+		BindIndices();
 
 		glBindVertexArray(0);
 	}
@@ -72,26 +67,92 @@ public:
 		glDeleteBuffers(1, &IBO);
 	}
 
-	void SetVerticies(Array<Vector3> verts) {
-		Verticies = verts;
+	void UpdateVertexAttributes() {
 		glBindVertexArray(VAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, Verticies.length * sizeof(Vector3), Verticies.data(), GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDisableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glDisableVertexAttribArray(1);
+		if (Normals.length) {
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(Verticies.length * sizeof(Vector3)));
+			glEnableVertexAttribArray(1);
+		}
+
+		glDisableVertexAttribArray(2);
+		if (UVs.length) {
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)((Verticies.length + Normals.length) * sizeof(Vector3)));
+			glEnableVertexAttribArray(2);
+		}
 
 		glBindVertexArray(0);
 	}
 
-	void SetIndices(Array<uint> indxs) {
-		Indices = indxs;
+	void AllocateBuffer() {
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void BindIndices() {
 		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.length * sizeof(uint), Indices.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	
+
 		glBindVertexArray(0);
+	}
+
+	void BindVerticies() {
+		AllocateBuffer();
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, Verticies.length * sizeof(Vector3), Verticies.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void BindNormals() {
+		BindVerticies();
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, Verticies.length * sizeof(Vector3), Normals.length * sizeof(Vector3), Normals.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void BindUVs() {
+		BindNormals();
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void SetIndices(Array<uint> indxs) {
+		Indices = indxs;
+
+		BindIndices();
+	}
+
+	void SetVerticies(Array<Vector3> verts) {
+		glBindVertexArray(VAO);
+		Verticies = verts;
+		BindVerticies();
+		glBindVertexArray(0);
+	}
+
+	void SetNormals(Array<Vector3> normals){
+		if (normals.length != Verticies.length)
+			throw "Normals and Verticies Must have the same length";
+		glBindVertexArray(VAO);
+		BindNormals();
+		UpdateVertexAttributes();
+		glBindVertexArray(0);
+	}
+
+	void SetUVs(Array<Vector2> uvs){
 	}
 
 	void draw(uint MVPMatrixUniform, Matrix4 ProjectionView) {
@@ -138,6 +199,6 @@ public:
 			Element.normalise();
 		});
 
-		Normals = normals;
+		SetNormals(normals);
 	}
 };
