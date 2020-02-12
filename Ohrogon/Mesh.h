@@ -46,19 +46,43 @@ public:
 
 	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Verticies(verts), Indices(indxs) {
 
+
 		glGenVertexArrays(1, &VAO);
 
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &IBO);
 
-		glBindVertexArray(VAO);
+
+		//AllocateBuffer();
 
 		BindVerticies();
-		UpdateVertexAttributes();
+
+		//glBindVertexArray(VAO);
+
+
+		//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		//glBufferData(GL_ARRAY_BUFFER, (Verticies.length + (long)Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
+
+		//glBufferSubData(GL_ARRAY_BUFFER, 0, Verticies.length * sizeof(Vector3), Verticies.data());
+
+		/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.length * sizeof(uint), Indices.data(), GL_STATIC_DRAW);*/
 
 		BindIndices();
 
-		glBindVertexArray(0);
+		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(0);
+
+		UpdateVertexAttributes();
+
+		//BindVerticies();
+		//UpdateVertexAttributes();
+
+
+		//BindIndices();
+
+
+		//glBindVertexArray(0);
 	}
 
 	~Mesh() {
@@ -69,6 +93,8 @@ public:
 
 	void UpdateVertexAttributes() {
 		glBindVertexArray(VAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 		glDisableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -85,6 +111,8 @@ public:
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)((Verticies.length + Normals.length) * sizeof(Vector3)));
 			glEnableVertexAttribArray(2);
 		}
+		
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glBindVertexArray(0);
 	}
@@ -92,7 +120,7 @@ public:
 	void AllocateBuffer() {
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (Verticies.length + (long)Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -122,38 +150,41 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void BindUVs() {
-		BindNormals();
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
+	//void BindUVs() {
+	//	BindNormals();
+	//	glBindVertexArray(VAO);
+	//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//	glBufferSubData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
+	//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//}
 
-	void SetIndices(Array<uint> indxs) {
-		Indices = indxs;
+	//void SetIndices(Array<uint> indxs) {
+	//	Indices = indxs;
 
-		BindIndices();
-	}
+	//	BindIndices();
+	//}
 
-	void SetVerticies(Array<Vector3> verts) {
-		glBindVertexArray(VAO);
-		Verticies = verts;
-		BindVerticies();
-		glBindVertexArray(0);
-	}
+	//void SetVerticies(Array<Vector3> verts) {
+	//	glBindVertexArray(VAO);
+	//	Verticies = verts;
+	//	BindVerticies();
+	//	glBindVertexArray(0);
+	//}
 
 	void SetNormals(Array<Vector3> normals){
 		if (normals.length != Verticies.length)
 			throw "Normals and Verticies Must have the same length";
+
+		Normals = normals;
+
 		glBindVertexArray(VAO);
 		BindNormals();
 		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
 
-	void SetUVs(Array<Vector2> uvs){
-	}
+	//void SetUVs(Array<Vector2> uvs){
+	//}
 
 	void draw(uint MVPMatrixUniform, Matrix4 ProjectionView) {
 		glBindVertexArray(VAO);
@@ -179,9 +210,13 @@ public:
 	void RecalculateNormals(){
 		Array<Vector3> normals(Verticies.length);
 
-		normals.map([](Vector3 vector, int index){
-			return Vector3();
-		});
+		for (int i = 0; i < normals.length; ++i) {
+			normals[i] = Vector3();
+		}
+
+		/*normals.map([](Vector3 vector, int index){
+			return Vector3(0, 0, 0);
+		});*/
 
 		for(int i = 0; i < Indices.length; i += 3){
 			int a = Indices[i];
@@ -195,9 +230,13 @@ public:
 			normals[c] += Normal;
 		}
 
-		normals.forEach([](Vector3 Element, int index){
+
+		for (int i = 0; i < normals.length; ++i) {
+			normals[i].normalise();
+		}
+	/*	normals.forEach([](Vector3 Element, int index){
 			Element.normalise();
-		});
+		});*/
 
 		SetNormals(normals);
 	}
