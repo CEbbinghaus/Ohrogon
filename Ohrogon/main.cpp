@@ -78,15 +78,14 @@ int main() {
 
 	shader.CompileShader();
 
-	//Array<Vector3> verts = generatePlane(lod);
-	//Array<uint> indxs = triangulatePlane(verts, lod);	
 
 	//Mesh plane = Primitive::Plane(1);
 	//Mesh cylinder = Primitive::Cylinder(20);
 	Mesh prim = Primitive::Cube();
 	//prim.FlatShade();
 	prim.SmoothShade();
-	//prim.RecalculateNormals();
+
+
 	bool Wireframe = false;
 	bool WasWireframeToggled = false;
 	
@@ -97,7 +96,7 @@ int main() {
 
 	glClearColor(0.30f, 0.30f, 0.40f, 1);
 
-	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix");
+	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix"); 
 	//auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
 
 	Camera cam;
