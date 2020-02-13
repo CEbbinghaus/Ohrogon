@@ -147,7 +147,8 @@ public:
 	}
 
 	void SetNormals(Array<Vector3> normals){
-		if (normals.length != Verticies.length)
+
+		if (normals.length && normals.length != Verticies.length)
 			throw "Normals and Verticies Must have the same length";
 
 		Normals = normals;
