@@ -6,6 +6,8 @@
 
 using uint = unsigned int;
 
+
+//TODO: Optimise the VRam Buffer Allocation and Rewriting
 class Mesh {
 public:
 
@@ -46,43 +48,16 @@ public:
 
 	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Verticies(verts), Indices(indxs) {
 
-
 		glGenVertexArrays(1, &VAO);
 
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &IBO);
 
-
-		//AllocateBuffer();
-
 		BindVerticies();
-
-		//glBindVertexArray(VAO);
-
-
-		//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		//glBufferData(GL_ARRAY_BUFFER, (Verticies.length + (long)Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
-
-		//glBufferSubData(GL_ARRAY_BUFFER, 0, Verticies.length * sizeof(Vector3), Verticies.data());
-
-		/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.length * sizeof(uint), Indices.data(), GL_STATIC_DRAW);*/
 
 		BindIndices();
 
-		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		//glEnableVertexAttribArray(0);
-
 		UpdateVertexAttributes();
-
-		//BindVerticies();
-		//UpdateVertexAttributes();
-
-
-		//BindIndices();
-
-
-		//glBindVertexArray(0);
 	}
 
 	~Mesh() {
@@ -150,26 +125,26 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	//void BindUVs() {
-	//	BindNormals();
-	//	glBindVertexArray(VAO);
-	//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//	glBufferSubData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
-	//	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//}
+	void BindUVs() {
+		BindNormals();
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 
-	//void SetIndices(Array<uint> indxs) {
-	//	Indices = indxs;
+	void SetIndices(Array<uint> indxs) {
+		Indices = indxs;
 
-	//	BindIndices();
-	//}
+		BindIndices();
+	}
 
-	//void SetVerticies(Array<Vector3> verts) {
-	//	glBindVertexArray(VAO);
-	//	Verticies = verts;
-	//	BindVerticies();
-	//	glBindVertexArray(0);
-	//}
+	void SetVerticies(Array<Vector3> verts) {
+		glBindVertexArray(VAO);
+		Verticies = verts;
+		BindVerticies();
+		glBindVertexArray(0);
+	}
 
 	void SetNormals(Array<Vector3> normals){
 		if (normals.length != Verticies.length)
@@ -183,8 +158,51 @@ public:
 		glBindVertexArray(0);
 	}
 
-	//void SetUVs(Array<Vector2> uvs){
-	//}
+	void SetUVs(Array<Vector2> uvs){
+
+	}
+
+	void FlatShade() {
+		Array<Vector3> oldVerts = Verticies;
+		Array<uint> oldIndicies = Indices;
+
+		Array<Vector3> newVerts;
+		Array<uint> newIndicies;
+
+		int i = 0;
+		for (uint& index : oldIndicies){
+			newVerts.push(oldVerts[index]);
+			newIndicies.push(newVerts.length - 1);
+		}
+
+		SetVerticies(newVerts);
+		SetIndices(newIndicies);
+		RecalculateNormals();
+	}
+
+	void SmoothShade(){
+		Array<Vector3> oldVerts = Verticies;
+		Array<uint> oldIndicies = Indices;
+
+		Array<Vector3> newVerts;
+		Array<uint> newIndicies;
+
+		int i = 0;
+		for (uint& index : oldIndicies) {
+			Vector3 b = oldVerts[index];
+			index = newVerts.indexOf(b);
+			if (index == -1) {
+				newVerts.push(b);
+				newIndicies.push(newVerts.length - 1);
+			}
+			else
+				newIndicies.push(index);
+		}
+
+		SetVerticies(newVerts);
+		SetIndices(newIndicies);
+		RecalculateNormals();
+	}
 
 	void draw(uint MVPMatrixUniform, Matrix4 ProjectionView) {
 		glBindVertexArray(VAO);

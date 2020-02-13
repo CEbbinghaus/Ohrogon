@@ -71,18 +71,27 @@ int main() {
 	//	Window::aspectRatio = ((float)width / height);
 	//}
 
-	Shader shader("./Shaders/VertShader.glsl", "./Shaders/FragShader.glsl");
+	Shader shader = Shader();
+
+	shader.LoadShader("./Shaders/VertShader.glsl", Shader::Type::Vertex);
+	shader.LoadShader("./Shaders/FragShader.glsl", Shader::Type::Frag);
+
+	shader.CompileShader();
 
 	//Array<Vector3> verts = generatePlane(lod);
-	//Array<uint> indxs = triangulatePlane(verts, lod);
+	//Array<uint> indxs = triangulatePlane(verts, lod);	
 
 	//Mesh plane = Primitive::Plane(1);
 	//Mesh cylinder = Primitive::Cylinder(20);
-	Mesh cube = Primitive::Cube();
-	cube.RecalculateNormals();
-
-	Clock clock = Clock();
+	Mesh prim = Primitive::Cube();
+	//prim.FlatShade();
+	prim.SmoothShade();
+	//prim.RecalculateNormals();
+	bool Wireframe = false;
+	bool WasWireframeToggled = false;
 	
+	bool FlatShaded = false;
+	bool WasFlatShadedToggled = false;
 
 	glUseProgram(shader.ProgrammID);
 
@@ -163,14 +172,37 @@ int main() {
 			movement += -up * 0.1;
 
 		if(Keyboard['m']){
-			glEnable(GL_CULL_FACE);
-			glPolygonMode(GL_FRONT, GL_FILL);
-		}
+			if (!WasWireframeToggled) {
+				if (Wireframe) {
+					glEnable(GL_CULL_FACE);
+					glPolygonMode(GL_FRONT, GL_FILL);
+					Wireframe = false;
+				}else {
+					glDisable(GL_CULL_FACE);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					Wireframe = true;
+				}
+				WasWireframeToggled = true;
+			}
+		}else
+			WasWireframeToggled = false;
 
-		if(Keyboard['l']){
-			glDisable(GL_CULL_FACE);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		if (Keyboard['l']) {
+			if (!WasFlatShadedToggled) {
+				if (FlatShaded) {
+					prim.FlatShade();
+					FlatShaded = false;
+				}
+				else {
+					prim.SmoothShade();
+					FlatShaded = true;
+				}
+				WasFlatShadedToggled = true;
+			}
 		}
+		else
+			WasFlatShadedToggled = false;
 
 
 		cam.transform.Position += movement * Time::OneTime;
@@ -181,7 +213,7 @@ int main() {
 
 		//cylinder.draw(MVPMatrixUniform, pv_M);
 
-		cube.draw(MVPMatrixUniform, pv_M);
+		prim.draw(MVPMatrixUniform, pv_M);
 
 		glfwSwapBuffers(window);
 		

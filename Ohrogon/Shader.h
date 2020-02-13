@@ -1,5 +1,7 @@
 #pragma once
 #include "gl_core_4_5.h"
+#include <atyp_Array.h>
+
 #include <fstream>
 #include <string>
 //#include <assert.h>
@@ -7,12 +9,10 @@
 #include <iostream>
 
 using uint = unsigned int;
+using string = std::string;
 
 class Shader{
-	std::string VertSrc;
-	std::string FragSrc;
-
-	std::string LoadFile(const char* filename) {
+	static string LoadFile(const char* filename) {
 		std::ifstream file(filename);
 		std::stringstream fileData;
 	
@@ -29,7 +29,7 @@ class Shader{
 			throw "Could not Load File";
 	}
 
-	uint CompileShader(std::string data, int flag) {
+	static uint CompileSource(string data, GLint flag) {
 		const char* dataSrc = data.c_str();
 		uint id = glCreateShader(flag);
 
@@ -62,35 +62,10 @@ class Shader{
 		return id;
 	}
 
-public:
-	uint VertID;
-	uint FragID;
-
-	uint ProgrammID;
-
-	Shader(const char* VertFile, const char* FragFile){
-
-		//Load Files
-		VertSrc = LoadFile(VertFile);
-		FragSrc = LoadFile(FragFile);
-
-
-		//Compile Shaders
-		VertID = CompileShader(VertSrc, GL_VERTEX_SHADER);
-		FragID = CompileShader(FragSrc, GL_FRAGMENT_SHADER);
-
-
-		//Create and Link Programm
-		ProgrammID = glCreateProgram();
-
-		glAttachShader(ProgrammID, VertID);
-		glAttachShader(ProgrammID, FragID);
-
-		glLinkProgram(ProgrammID);
-
+	static void AssertShaderErrors(uint ProgrammID){
 		GLint success = GL_FALSE;
 		glGetProgramiv(ProgrammID, GL_LINK_STATUS, &success);
-		if(!success){
+		if (!success) {
 
 			GLint maxLength = 0;
 			glGetProgramiv(ProgrammID, GL_INFO_LOG_LENGTH, &maxLength);
@@ -98,14 +73,90 @@ public:
 			// The maxLength includes the NULL character
 			char* errorLog = new char[maxLength];
 			glGetProgramInfoLog(ProgrammID, maxLength, &maxLength, errorLog);
-			
+
 			//Print the Log and delete the memory
 			printf(errorLog);
-			free(errorLog);
+			delete[] errorLog;
 
 
 			throw std::exception("Cannot Link Shaders");
 		}
+	}
+
+public:
+	enum class Type {
+		Vertex = GL_VERTEX_SHADER,
+		Frag = GL_FRAGMENT_SHADER
+	};
+
+	Array<uint> ShaderIDs;
+
+	uint ProgrammID;
+
+	Shader(){
+
+		//Create and Link Programm
+		ProgrammID = glCreateProgram();
+
+		glLinkProgram(ProgrammID);
+
+		
+	}
+
+	//static uint LoadShader(const char* filename, Type ShaderType) {
+	//	string source = LoadFile(filename);
+	//	uint id = CompileSource(source, (GLint)ShaderType);
+	//	return id;
+	//}
+
+	uint LoadShader(const char* filename, Type ShaderType){
+		string source = LoadFile(filename);
+		uint id = CompileSource(source, (GLint)ShaderType);
+		ShaderIDs.push(id);
+		return id;
+	}
+	
+	uint AddShader(uint id){
+		ShaderIDs.push(id);
+	}
+
+	uint CompileShader(){
+		for (uint& id : ShaderIDs) {
+			glAttachShader(ProgrammID, id);
+		}
+		glLinkProgram(ProgrammID);
+		AssertShaderErrors(ProgrammID);
+
+		return ProgrammID;
+	}
+
+	uint CompileShader(std::initializer_list<uint> ids){
+		for (uint& id : ShaderIDs) {
+			glAttachShader(ProgrammID, id);
+		}
+
+		auto ptr = ids.begin();
+		while (ptr != ids.end()){
+			glAttachShader(ProgrammID, *ptr);
+		}
+		glLinkProgram(ProgrammID);
+		AssertShaderErrors(ProgrammID);
+
+		return ProgrammID;
+	}
+
+	//static uint CompileShader(std::initializer_list<uint> ids){
+	//	uint ProgrammID = glCreateProgram();
+	//	auto ptr = ids.begin();
+	//	while (ptr != ids.end()) {
+	//		glAttachShader(ProgrammID, *ptr);
+	//	}
+	//	glLinkProgram(ProgrammID);
+	//	AssertShaderErrors(ProgrammID);
+	//}
+
+	operator uint(){
+		return ProgrammID;
 	}
 
 	~Shader() = default;
