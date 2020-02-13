@@ -15,6 +15,7 @@
 #include "Mesh.h"
 #include "Primitive.h"
 #include "Time.h"
+#include "ModelLoader.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -57,7 +58,7 @@ int main() {
 	//Mouse Initialization
 	MouseManager Mouse = MouseManager::CreateMouseManager(window);
 
-	
+
 
 	//{
 	//	int x, y;
@@ -81,9 +82,12 @@ int main() {
 
 	//Mesh plane = Primitive::Plane(1);
 	//Mesh cylinder = Primitive::Cylinder(20);
-	Mesh prim = Primitive::Cube();
+	//Mesh prim = Primitive::Cube();
+	Mesh prim = ModelLoader::LoadObj("./Meshes/Bunny.obj");
 	//prim.FlatShade();
 	prim.SmoothShade();
+
+	prim.transform.Scale = Vector3(10.0f);
 
 
 	bool Wireframe = false;

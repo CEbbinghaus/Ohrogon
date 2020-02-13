@@ -179,8 +179,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="File.h" />
     <ClInclude Include="KeyManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="MouseManager.h" />
     <ClInclude Include="Primitive.h" />
     <ClInclude Include="Shader.h" />

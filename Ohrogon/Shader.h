@@ -2,32 +2,13 @@
 #include "gl_core_4_5.h"
 #include <atyp_Array.h>
 
-#include <fstream>
-#include <string>
+#include "File.h"
 //#include <assert.h>
-#include <sstream>
-#include <iostream>
 
-using uint = unsigned int;
 using string = std::string;
+using uint = unsigned int;
 
 class Shader{
-	static string LoadFile(const char* filename) {
-		std::ifstream file(filename);
-		std::stringstream fileData;
-	
-
-		//Vertex Shader File Loading
-		if (file.is_open()) {
-			fileData << file.rdbuf();
-
-			file.close();
-
-			return fileData.str();
-		}
-		else
-			throw "Could not Load File";
-	}
 
 	static uint CompileSource(string data, GLint flag) {
 		const char* dataSrc = data.c_str();
@@ -110,7 +91,7 @@ public:
 	//}
 
 	uint LoadShader(const char* filename, Type ShaderType){
-		string source = LoadFile(filename);
+		string source = File::ReadText(filename);
 		uint id = CompileSource(source, (GLint)ShaderType);
 		ShaderIDs.push(id);
 		return id;
