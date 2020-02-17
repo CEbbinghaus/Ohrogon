@@ -7,6 +7,8 @@
 *.o
 *.obj
 
+!**/Meshes/*
+
 # Precompiled Headers
 *.gch
 *.pch

@@ -89,7 +89,7 @@ int main(){
 	//Mesh cylinder = Primitive::Cylinder(20);
 	//Mesh prim = Primitive::Cube();
 
-	Mesh prim = Primitive::Cube();
+	Mesh prim = ModelLoader::LoadObj("./Meshes/Bunny.obj");
 	//prim = ModelLoader::LoadObj("./Meshes/bear.obj");
 	
 	//Mesh* m{};
@@ -107,10 +107,10 @@ int main(){
 	
 
 
-	//prim.FlatShade();
+	prim.FlatShade();
 	//prim.SmoothShade();
 
-	//prim.transform.Scale = Vector3(10.0f);
+	prim.transform.Scale = Vector3(10.0f);
 
 
 	bool Wireframe = false;
@@ -122,7 +122,7 @@ int main(){
 	glClearColor(0.30f, 0.30f, 0.40f, 1);
 
 	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix"); 
-	//auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
+	auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
 
 	Camera cam;
 
@@ -131,7 +131,7 @@ int main(){
 	cam.NearPlane = 0.01f;
 	cam.FarPlane = 100000.0f;
 
-	//plane.transform.Scale = Vector3::one() * 10;
+	//plane.transform.Scale = Vector3::one() * 10.0f;
 	//plane.transform.Position = Vector3(-.5f, 0, -.5f);
 
 	float f = 0.0f;
@@ -168,7 +168,9 @@ int main(){
 		//	Window::aspectRatio = ((float)width / height);
 		//}
 
-		f += 0.01f;
+		f += Time::DeltaTime;
+
+		prim.transform.Rotation = Vector3::up() * f;
 
 		if (f > 0.5f)
 			camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
@@ -233,7 +235,10 @@ int main(){
 
 		cam.transform.Position += movement * Time::OneTime;
 
+		Matrix4 ModelMatrix = prim.transform.updateTransform();
 		Matrix4 pv_M = cam.getPVMatrix();
+		glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
+		glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
 
 		//plane.draw(MVPMatrixUniform, pv_M);
 

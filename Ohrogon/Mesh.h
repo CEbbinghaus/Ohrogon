@@ -15,7 +15,7 @@ public:
 	uint VBO;
 	uint IBO;
 
-	Array<Vector3> Verticies;
+	Array<Vector3> Vertices;
 	Array<Vector3> Normals;
 	Array<Vector3> Colors;
 	Array<Vector2> UVs;
@@ -31,7 +31,7 @@ public:
 		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, Verticies.length * sizeof(Vector3), Verticies.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, Vertices.length * sizeof(Vector3), Vertices.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.length * sizeof(uint), Indices.data(), GL_STATIC_DRAW);
@@ -43,42 +43,42 @@ public:
 		glBindVertexArray(0);
 	}
 
-	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Verticies(verts), Indices(indxs) {
+	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Vertices(verts), Indices(indxs) {
 		
 		GenerateBuffers();
 		
-		BindVerticies();
+		BindVertices();
 
 		BindIndices();
 
 		UpdateVertexAttributes();
 	}
 
-	Mesh(const Mesh& original){
-		GenerateBuffers();
+	//Mesh(const Mesh& original){
+	//	GenerateBuffers();
 
-		Verticies = original.Verticies;
-		Normals = original.Normals;
-		Colors = original.Colors;
-		UVs = original.UVs;
+	//	Vertices = original.Vertices;
+	//	Normals = original.Normals;
+	//	Colors = original.Colors;
+	//	UVs = original.UVs;
 
-		BindUVs();
+	//	BindUVs();
 
-		UpdateVertexAttributes();
-	}
+	//	UpdateVertexAttributes();
+	//}
 
-	Mesh(Mesh&& original) noexcept{
-		GenerateBuffers();
+	//Mesh(Mesh&& original) noexcept{
+	//	GenerateBuffers();
 
-		Verticies = original.Verticies;
-		Normals = original.Normals;
-		Colors = original.Colors;
-		UVs = original.UVs;
+	//	Vertices = original.Vertices;
+	//	Normals = original.Normals;
+	//	Colors = original.Colors;
+	//	UVs = original.UVs;
 
-		BindUVs();
+	//	BindUVs();
 
-		UpdateVertexAttributes();
-	}
+	//	UpdateVertexAttributes();
+	//}
 
 	~Mesh() {
 		DeleteBuffers();
@@ -108,17 +108,17 @@ public:
 
 		glDisableVertexAttribArray(1);
 		if (Normals.length) {
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(Verticies.length * sizeof(Vector3)));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(Vertices.length * sizeof(Vector3)));
 			glEnableVertexAttribArray(1);
 		}
 
 		glDisableVertexAttribArray(2);
 		if (UVs.length) {
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)((Verticies.length + Normals.length) * sizeof(Vector3)));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)((Vertices.length + Normals.length) * sizeof(Vector3)));
 			glEnableVertexAttribArray(2);
 		}
 		
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+ 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glBindVertexArray(0);
 	}
@@ -126,7 +126,7 @@ public:
 	void AllocateBuffer() {
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, (Verticies.length + (long)Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (Vertices.length + (long)Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -140,19 +140,19 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void BindVerticies() {
+	void BindVertices() {
 		AllocateBuffer();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, Verticies.length * sizeof(Vector3), Verticies.data());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, Vertices.length * sizeof(Vector3), Vertices.data());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	void BindNormals() {
-		BindVerticies();
+		BindVertices();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, Verticies.length * sizeof(Vector3), Normals.length * sizeof(Vector3), Normals.data());
+		glBufferSubData(GL_ARRAY_BUFFER, Vertices.length * sizeof(Vector3), Normals.length * sizeof(Vector3), Normals.data());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -160,7 +160,7 @@ public:
 		BindNormals();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, (Verticies.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
+		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -170,17 +170,22 @@ public:
 		BindIndices();
 	}
 
-	void SetVerticies(Array<Vector3> verts) {
+	void SetVertices(Array<Vector3> verts) {
 		glBindVertexArray(VAO);
-		Verticies = verts;
-		BindVerticies();
+		Vertices = verts;
+		BindVertices();
 		glBindVertexArray(0);
 	}
 
 	void SetNormals(Array<Vector3> normals){
+		if (!normals.length) {
+			SetNormals(Vertices.map([](Vector3 v, int i) {return Vector3::one(); }));
+			return;
+		}
 
-		if (normals.length && normals.length != Verticies.length)
-			throw "Normals and Verticies Must have the same length";
+
+		if (normals.length != Vertices.length)
+			throw "Normals and Vertices Must have the same length";
 
 		Normals = normals;
 
@@ -195,7 +200,7 @@ public:
 	}
 
 	void FlatShade() {
-		Array<Vector3> oldVerts = Verticies;
+		Array<Vector3> oldVerts = Vertices;
 		Array<uint> oldIndicies = Indices;
 
 		Array<Vector3> newVerts;
@@ -207,13 +212,13 @@ public:
 			newIndicies.push(newVerts.length - 1);
 		}
 
-		SetVerticies(newVerts);
+		SetVertices(newVerts);
 		SetIndices(newIndicies);
 		RecalculateNormals();
 	}
 
 	void SmoothShade(){
-		Array<Vector3> oldVerts = Verticies;
+		Array<Vector3> oldVerts = Vertices;
 		Array<uint> oldIndicies = Indices;
 
 		Array<Vector3> newVerts;
@@ -231,7 +236,7 @@ public:
 				newIndicies.push(index);
 		}
 
-		SetVerticies(newVerts);
+		SetVertices(newVerts);
 		SetIndices(newIndicies);
 		RecalculateNormals();
 	}
@@ -241,7 +246,7 @@ public:
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-		glUniformMatrix4fv(MVPMatrixUniform, 1, false, ProjectionView * transform.updateTransform());
+		//glUniformMatrix4fv(MVPMatrixUniform, 1, false, ProjectionView * transform.updateTransform());
 		//glUniformMatrix4fv(ModelMatrixUniform, 1, false, t.localTransform);
 
 		/*glPolygonMode(GL_FRONT, GL_FILL);
@@ -258,7 +263,7 @@ public:
 	}
 
 	void RecalculateNormals(){
-		Array<Vector3> normals(Verticies.length);
+		Array<Vector3> normals(Vertices.length);
 
 		for (int i = 0; i < normals.length; ++i) {
 			normals[i] = Vector3();
@@ -273,7 +278,7 @@ public:
 			int b = Indices[i + 1];
 			int c = Indices[i + 2];
 
-			Vector3 Normal = Vector3::FaceNormal(Verticies[a], Verticies[b], Verticies[c]);
+			Vector3 Normal = Vector3::FaceNormal(Vertices[a], Vertices[b], Vertices[c]);
 
 			normals[a] += Normal;
 			normals[b] += Normal;
@@ -291,13 +296,13 @@ public:
 		SetNormals(normals);
 	}
 
-	Mesh& operator=(const Mesh& original){
-		Verticies = original.Verticies;
-		Normals = original.Normals;
-		Colors = original.Colors;
-		UVs = original.UVs;
+	//Mesh& operator=(const Mesh& original){
+	//	Vertices = original.Vertices;
+	//	Normals = original.Normals;
+	//	Colors = original.Colors;
+	//	UVs = original.UVs;
 
-		BindUVs();
-		return *this;
-	}
+	//	BindUVs();
+	//	return *this;
+	//}
 };
