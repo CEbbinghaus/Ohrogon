@@ -84,6 +84,10 @@ public:
 		
 	}
 
+	~Shader(){
+		glDeleteProgram(ProgrammID);
+	}
+
 	//static uint LoadShader(const char* filename, Type ShaderType) {
 	//	string source = LoadFile(filename);
 	//	uint id = CompileSource(source, (GLint)ShaderType);
@@ -140,6 +144,6 @@ public:
 		return ProgrammID;
 	}
 
-	~Shader() = default;
+	//~Shader() = default;
 };
 

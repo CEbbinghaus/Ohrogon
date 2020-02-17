@@ -6,6 +6,7 @@
 #include <atyp_Transform.h>
 #include <atyp_Math.h>
 #include <atyp_Array.h>
+#include <atyp_Threading.h>
 
 #include "Shader.h"
 #include "Camera.h"
@@ -20,21 +21,21 @@
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
 
-int main() {
+int main(){
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	if (glfwInit() == false)
+	if(glfwInit() == false)
 		return -1;
 
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "Ohrogon Engine", nullptr, nullptr);
 
-	if (window == nullptr) {
+	if(window == nullptr){
 		glfwTerminate(); return -2;
 	}
 
 	glfwMakeContextCurrent(window);
-	
-	if (ogl_LoadFunctions() == ogl_LOAD_FAILED) {
+
+	if(ogl_LoadFunctions() == ogl_LOAD_FAILED){
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		return -3;
@@ -52,7 +53,7 @@ int main() {
 
 	//Mouse Configuration Options
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	if (glfwRawMouseMotionSupported())
+	if(glfwRawMouseMotionSupported())
 		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 	//Mouse Initialization
@@ -74,27 +75,47 @@ int main() {
 
 	Shader shader = Shader();
 
-	shader.LoadShader("./Shaders/VertShader.glsl", Shader::Type::Vertex);
-	shader.LoadShader("./Shaders/FragShader.glsl", Shader::Type::Frag);
+	uint VertShader = shader.LoadShader("./Shaders/VertShader.shader", Shader::Type::Vertex);
+	uint FragShader = shader.LoadShader("./Shaders/FragShader.shader", Shader::Type::Frag);
 
 	shader.CompileShader();
+
+	//Shader shader2 = Shader();
+
+	//shader2.CompileShader({ VertShader, FragShader })
 
 
 	//Mesh plane = Primitive::Plane(1);
 	//Mesh cylinder = Primitive::Cylinder(20);
 	//Mesh prim = Primitive::Cube();
-	Mesh prim = ModelLoader::LoadObj("./Meshes/Bunny.obj");
-	//prim.FlatShade();
-	prim.SmoothShade();
 
-	prim.transform.Scale = Vector3(10.0f);
+	Mesh prim = Primitive::Cube();
+	//prim = ModelLoader::LoadObj("./Meshes/bear.obj");
+	
+	//Mesh* m{};
+	//bool done = false;
+
+	//void (*func)(Mesh*){
+	//	[](Mesh* m){
+	//		Mesh mesh = ModelLoader::LoadObj("./Meshes/teapot.obj");
+	//		m = new Mesh(mesh);
+	//		printf("Mesh Successfully loaded\n");
+	//	}
+	//};
+
+	//Thread<Mesh> t = Thread(func, done, m);
+	
+
+
+	//prim.FlatShade();
+	//prim.SmoothShade();
+
+	//prim.transform.Scale = Vector3(10.0f);
 
 
 	bool Wireframe = false;
-	bool WasWireframeToggled = false;
 	
 	bool FlatShaded = false;
-	bool WasFlatShadedToggled = false;
 
 	glUseProgram(shader.ProgrammID);
 
@@ -117,15 +138,23 @@ int main() {
 	Vector2 camRotation(0.0f, 0.0f);
 
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT, GL_FILL);
 
-	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+	while (glfwWindowShouldClose(window) == false && !(Keyboard.altKey && Keyboard.shiftKey && Keyboard[KeyCode::DELETE_Key])) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
+		Keyboard.Update();
 
 		Time::Update();
 
+
+		/*if(done){
+			printf("Done Flag set\n");
+			done = false;
+			prim = *m;
+		}*/
 
 		//{
 		//	int x, y;
@@ -174,39 +203,33 @@ int main() {
 		if (Keyboard[KeyCode::LEFT_CONTROL])
 			movement += -up * 0.1;
 
-		if(Keyboard['m']){
-			if (!WasWireframeToggled) {
-				if (Wireframe) {
-					glEnable(GL_CULL_FACE);
-					glPolygonMode(GL_FRONT, GL_FILL);
-					Wireframe = false;
-				}else {
-					glDisable(GL_CULL_FACE);
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					Wireframe = true;
-				}
-				WasWireframeToggled = true;
-			}
-		}else
-			WasWireframeToggled = false;
-
-
-		if (Keyboard['l']) {
-			if (!WasFlatShadedToggled) {
-				if (FlatShaded) {
-					prim.FlatShade();
-					FlatShaded = false;
-				}
-				else {
-					prim.SmoothShade();
-					FlatShaded = true;
-				}
-				WasFlatShadedToggled = true;
+		if(Keyboard.pressed['m']){
+			if (Wireframe) {
+				glEnable(GL_CULL_FACE);
+				glPolygonMode(GL_FRONT, GL_FILL);
+				Wireframe = false;
+			}else {
+				glDisable(GL_CULL_FACE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				Wireframe = true;
 			}
 		}
-		else
-			WasFlatShadedToggled = false;
 
+
+		if (Keyboard.pressed['l']) {
+			if (FlatShaded) {
+				prim.FlatShade();
+				FlatShaded = false;
+			}
+			else {
+				prim.SmoothShade();
+				FlatShaded = true;
+			}
+		}
+
+		if(Keyboard[KeyCode::ESCAPE]){
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 
 		cam.transform.Position += movement * Time::OneTime;
 

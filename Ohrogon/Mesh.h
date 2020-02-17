@@ -26,10 +26,7 @@ public:
 
 	Mesh() {
 
-		glGenVertexArrays(1, &VAO);
-
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &IBO);
+		GenerateBuffers();
 
 		glBindVertexArray(VAO);
 
@@ -47,12 +44,9 @@ public:
 	}
 
 	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Verticies(verts), Indices(indxs) {
-
-		glGenVertexArrays(1, &VAO);
-
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &IBO);
-
+		
+		GenerateBuffers();
+		
 		BindVerticies();
 
 		BindIndices();
@@ -60,7 +54,44 @@ public:
 		UpdateVertexAttributes();
 	}
 
+	Mesh(const Mesh& original){
+		GenerateBuffers();
+
+		Verticies = original.Verticies;
+		Normals = original.Normals;
+		Colors = original.Colors;
+		UVs = original.UVs;
+
+		BindUVs();
+
+		UpdateVertexAttributes();
+	}
+
+	Mesh(Mesh&& original) noexcept{
+		GenerateBuffers();
+
+		Verticies = original.Verticies;
+		Normals = original.Normals;
+		Colors = original.Colors;
+		UVs = original.UVs;
+
+		BindUVs();
+
+		UpdateVertexAttributes();
+	}
+
 	~Mesh() {
+		DeleteBuffers();
+	}
+
+	void GenerateBuffers(){
+		glGenVertexArrays(1, &VAO);
+
+		glGenBuffers(1, &VBO);
+		glGenBuffers(1, &IBO);
+	}
+
+	void DeleteBuffers(){
 		glDeleteBuffers(1, &VAO);
 		glDeleteBuffers(1, &VBO);
 		glDeleteBuffers(1, &IBO);
@@ -258,5 +289,15 @@ public:
 		});*/
 
 		SetNormals(normals);
+	}
+
+	Mesh& operator=(const Mesh& original){
+		Verticies = original.Verticies;
+		Normals = original.Normals;
+		Colors = original.Colors;
+		UVs = original.UVs;
+
+		BindUVs();
+		return *this;
 	}
 };
