@@ -181,6 +181,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="KeyManager.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="MouseManager.h" />
@@ -188,6 +189,10 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\FragShader.shader" />
+    <None Include="Shaders\VertShader.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

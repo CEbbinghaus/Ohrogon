@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <memory>
 
-enum class KeyCode {
+enum class KeyCode : int {
 	UNKNOWN = GLFW_KEY_UNKNOWN,
 	SPACE = GLFW_KEY_SPACE,
 	APOSTROPHE = GLFW_KEY_APOSTROPHE,
@@ -125,15 +125,45 @@ enum class KeyCode {
 	RIGHT_ALT = GLFW_KEY_RIGHT_ALT,
 	RIGHT_SUPER = GLFW_KEY_RIGHT_SUPER,
 	MENU = GLFW_KEY_MENU,
-	LAST = GLFW_KEY_LAST
+	LAST = GLFW_KEY_LAST + 1
 };
 
-class KeyManager{
-	bool* data;
+#define KeyArraySize GLFW_KEY_LAST + 1
 
-	bool ctrlKey;
-	bool shiftKey;
-	bool altKey;
+
+
+class KeyManager{
+
+	class KeyArray{
+		bool data[KeyArraySize];
+
+	public:
+		void Set(int i, bool value){
+			data[i] = value;
+		}
+
+		bool operator[](int i){
+			return data[i];
+		}
+		
+		bool operator[](char key){
+			if(key > 96 && key < 123)
+				return data[key - 32];
+
+			return data[key];
+		}
+
+		bool operator[](KeyCode key){
+			return data[(int)key];
+		}
+
+		bool* operator&(){
+			return data;
+		}
+	};
+
+	KeyArray data;
+	KeyArray altdata;
 
 	static KeyManager* Instance;
 
@@ -142,7 +172,7 @@ class KeyManager{
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 		if(KeyManager::Instance == nullptr)return;
 
-		KeyManager::Instance->data[key] = action;
+		KeyManager::Instance->data.Set(key, (bool)action);
 
 		KeyManager::Instance->ctrlKey = mods & GLFW_MOD_CONTROL;
 		KeyManager::Instance->altKey = mods & GLFW_MOD_ALT;
@@ -150,15 +180,58 @@ class KeyManager{
 	}
 
 	KeyManager(GLFWwindow* window){
-		data = new bool[GLFW_KEY_LAST + 1];
-		memset(data, 0, GLFW_KEY_LAST + 1 * sizeof(bool));
+		/*data = new bool[KeyArraySize];
+		memset(data, 0, KeyArraySize * sizeof(bool));
+		
+		altdata = new bool[KeyArraySize];
+		memset(altdata, 0, KeyArraySize * sizeof(bool));*/
 
 		this->window = window;
 	}
 
+	void SwapArrays(){
+		memcpy(&altdata, &data, KeyArraySize * sizeof(bool));
+		//bool* tmp = data;
+		//data = altdata;
+		//altdata = tmp;
+	}
+
 public:
+	bool ctrlKey;
+	bool shiftKey;
+	bool altKey;
+
+	KeyArray pressed;
+	KeyArray released;
+
 	KeyManager(KeyManager const&) = delete;
 	void operator=(KeyManager const&) = delete;
+
+	static void Update(){
+		if(!Instance)return;
+
+		auto& data = Instance->data;
+		auto& altdata = Instance->altdata;
+		auto& pressed = Instance->pressed;
+		auto& released = Instance->released;
+
+		for(int i = 0; i < KeyArraySize; ++i){
+			if(data[i] == altdata[i]){
+				pressed.Set(i, false);
+				released.Set(i, false);
+			}else{
+				if(data[i]){
+					pressed.Set(i, true);
+					released.Set(i, false);
+				} else{
+					pressed.Set(i, false);
+					released.Set(i, true);
+				}
+			}
+		}
+
+		Instance->SwapArrays();
+	}
 
 	static KeyManager& CreateKeyManager(GLFWwindow* window) {
 		if (Instance != nullptr)
@@ -172,8 +245,11 @@ public:
 	}
 
 	static void DestroyKeyManager(){
-		delete[] Instance->data;
-		Instance->data = nullptr;
+		//delete[] Instance->data;
+		//Instance->data = nullptr;
+		//
+		//delete[] Instance->altdata;
+		//Instance->altdata = nullptr;
 
 		delete Instance;
 		Instance = nullptr;

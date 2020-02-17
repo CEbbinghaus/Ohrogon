@@ -66,7 +66,10 @@ public:
 			++adr;
 		}
 
-		for (const char* line : lines){
+		for (auto [lineptr, index] : lines){
+
+			const char* line = *lineptr;
+
 			if (startsWith(line, "#"))continue;
 
 			if (startsWith(line, "v")){
