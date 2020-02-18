@@ -6,21 +6,22 @@
 
 using uint = unsigned int;
 
-
-//TODO: Optimise the VRam Buffer Allocation and Rewriting
-class Mesh {
-public:
-
-	uint VAO;
-	uint VBO;
-	uint IBO;
-
+struct MeshData{
 	Array<Vector3> Vertices;
 	Array<Vector3> Normals;
 	Array<Vector3> Colors;
 	Array<Vector2> UVs;
 
 	Array<uint> Indices;
+};
+
+//TODO: Optimise the VRam Buffer Allocation and Rewriting
+class Mesh: public MeshData {
+public:
+
+	uint VAO;
+	uint VBO;
+	uint IBO;
 
 	Transform transform;
 
@@ -43,7 +44,10 @@ public:
 		glBindVertexArray(0);
 	}
 
-	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs) : Vertices(verts), Indices(indxs) {
+	Mesh(const Array<Vector3>& verts, const Array<uint>& indxs)
+	{
+		Vertices = verts;
+		Indices = indxs;
 		
 		GenerateBuffers();
 		

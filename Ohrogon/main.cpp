@@ -21,6 +21,17 @@
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
 
+bool IsActive = true;
+
+void window_focus_callback(GLFWwindow* window, int focused){
+	if(focused){
+		IsActive = true;// The window gained input focus
+	} else{
+		IsActive = false;
+		// The window lost input focus
+	}
+}
+
 int main(){
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
@@ -40,6 +51,8 @@ int main(){
 		glfwTerminate();
 		return -3;
 	}
+
+	glfwSetWindowFocusCallback(window, window_focus_callback);
 
 	auto major = ogl_GetMajorVersion();
 	auto minor = ogl_GetMinorVersion();
@@ -89,7 +102,7 @@ int main(){
 	//Mesh cylinder = Primitive::Cylinder(20);
 	//Mesh prim = Primitive::Cube();
 
-	Mesh prim = ModelLoader::LoadObj("./Meshes/Bunny.obj");
+	Mesh prim = ModelLoader::LoadObj("./Meshes/Teapot.obj");
 	//prim = ModelLoader::LoadObj("./Meshes/bear.obj");
 	
 	//Mesh* m{};
@@ -144,8 +157,10 @@ int main(){
 
 	while (glfwWindowShouldClose(window) == false && !(Keyboard.altKey && Keyboard.shiftKey && Keyboard[KeyCode::DELETE_Key])) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glfwPollEvents();
-		Keyboard.Update();
+		if(IsActive){
+			glfwPollEvents();
+			Keyboard.Update();
+		}
 
 		Time::Update();
 
