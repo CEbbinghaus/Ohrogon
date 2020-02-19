@@ -58,6 +58,16 @@ public:
 		UpdateVertexAttributes();
 	}
 
+	Mesh(const Mesh& original) {
+		printf("Copy Constructor Called");
+		GenerateBuffers();
+		SetVertices(original.Vertices);
+		SetIndices(original.Indices);
+		SetNormals(original.Normals);
+		SetUVs(original.UVs);
+		UpdateVertexAttributes();
+	}
+
 	//Mesh(const Mesh& original){
 	//	GenerateBuffers();
 
@@ -188,8 +198,8 @@ public:
 		}
 
 
-		if (normals.length != Vertices.length)
-			throw "Normals and Vertices Must have the same length";
+		//if (normals.length != Vertices.length)
+		//	throw "Normals and Vertices Must have the same length";
 
 		Normals = normals;
 
@@ -200,25 +210,39 @@ public:
 	}
 
 	void SetUVs(Array<Vector2> uvs){
+		if (!uvs.length) {
+			//SetNormals(Vertices.map([](Vector3 v, int i) {return Vector3::one(); }));
+			return;
+		}
 
+
+		//if (uvs.length != Vertices.length)
+		//	throw "Normals and Vertices Must have the same length";
+
+		UVs = uvs;
+
+		glBindVertexArray(VAO);
+		BindUVs();
+		UpdateVertexAttributes();
+		glBindVertexArray(0);
 	}
 
 	void FlatShade() {
-		Array<Vector3> oldVerts = Vertices;
-		Array<uint> oldIndicies = Indices;
-
-		Array<Vector3> newVerts;
-		Array<uint> newIndicies;
-
-		int i = 0;
-		for (uint& index : oldIndicies){
-			newVerts.push(oldVerts[index]);
-			newIndicies.push(newVerts.length - 1);
-		}
-
-		SetVertices(newVerts);
-		SetIndices(newIndicies);
-		RecalculateNormals();
+		//Array<Vector3> oldVerts = Vertices;
+		//Array<uint> oldIndicies = Indices;
+		//
+		//Array<Vector3> newVerts;
+		//Array<uint> newIndicies;
+		//
+		//int i = 0;
+		//for (uint& index : oldIndicies){
+		//	newVerts.push(oldVerts[index]);
+		//	newIndicies.push(newVerts.length - 1);
+		//}
+		//
+		//SetVertices(Vertices);
+		SetIndices(Indices);
+		//RecalculateNormals();
 	}
 
 	void SmoothShade(){
@@ -290,12 +314,13 @@ public:
 		}
 
 
-		for (int i = 0; i < normals.length; ++i) {
+		/*for (int i = 0; i < normals.length; ++i) {
 			normals[i].normalise();
-		}
-	/*	normals.forEach([](Vector3 Element, int index){
+		}*/
+
+		normals.forEach([](Vector3& Element, int index){
 			Element.normalise();
-		});*/
+		});
 
 		SetNormals(normals);
 	}

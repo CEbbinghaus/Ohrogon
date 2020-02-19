@@ -8,6 +8,9 @@
 #include <atyp_Array.h>
 #include <atyp_Threading.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "Shader.h"
 #include "Camera.h"
 #include "Window.h"
@@ -21,16 +24,16 @@
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
 
-bool IsActive = true;
-
-void window_focus_callback(GLFWwindow* window, int focused){
-	if(focused){
-		IsActive = true;// The window gained input focus
-	} else{
-		IsActive = false;
-		// The window lost input focus
-	}
-}
+//bool IsActive = true;
+//
+//void window_focus_callback(GLFWwindow* window, int focused){
+//	if(focused){
+//		IsActive = true;// The window gained input focus
+//	} else{
+//		IsActive = false;
+//		// The window lost input focus
+//	}
+//}
 
 int main(){
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -52,7 +55,7 @@ int main(){
 		return -3;
 	}
 
-	glfwSetWindowFocusCallback(window, window_focus_callback);
+	//glfwSetWindowFocusCallback(window, window_focus_callback);
 
 	auto major = ogl_GetMajorVersion();
 	auto minor = ogl_GetMinorVersion();
@@ -98,11 +101,35 @@ int main(){
 	//shader2.CompileShader({ VertShader, FragShader })
 
 
+	Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
+	//prim.FlatShade();
+	//prim.SetIndices(prim.Indices);
+
 	//Mesh plane = Primitive::Plane(1);
 	//Mesh cylinder = Primitive::Cylinder(20);
 	//Mesh prim = Primitive::Cube();
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
 
-	Mesh prim = ModelLoader::LoadObj("./Meshes/Teapot.obj");
+	if(!data)throw "Couldnt Find Image";
+	if(!data)throw "Couldnt Find Image";
+
+
+	uint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glActiveTexture(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
+	glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data);
 	//prim = ModelLoader::LoadObj("./Meshes/bear.obj");
 	
 	//Mesh* m{};
@@ -120,10 +147,10 @@ int main(){
 	
 
 
-	prim.FlatShade();
+	//prim.FlatShade();
 	//prim.SmoothShade();
 
-	prim.transform.Scale = Vector3(10.0f);
+	prim.transform.Scale = Vector3(5.0f);
 
 
 	bool Wireframe = false;
@@ -136,6 +163,7 @@ int main(){
 
 	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix"); 
 	auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
+	//auto TextureUniform = glGetUniformLocation(shader.ProgrammID, "Texture");
 
 	Camera cam;
 
@@ -157,14 +185,16 @@ int main(){
 
 	while (glfwWindowShouldClose(window) == false && !(Keyboard.altKey && Keyboard.shiftKey && Keyboard[KeyCode::DELETE_Key])) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if(IsActive){
+		//if(IsActive){
 			glfwPollEvents();
 			Keyboard.Update();
-		}
+		//}
 
 		Time::Update();
 
-
+		if (Keyboard[KeyCode::ENTER] && Keyboard.ctrlKey && Keyboard.shiftKey) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
 		/*if(done){
 			printf("Done Flag set\n");
 			done = false;
@@ -254,6 +284,7 @@ int main(){
 		Matrix4 pv_M = cam.getPVMatrix();
 		glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
 		glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
+		//glUniform1i(TextureUniform, )
 
 		//plane.draw(MVPMatrixUniform, pv_M);
 
