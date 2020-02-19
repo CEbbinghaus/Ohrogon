@@ -118,7 +118,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\glfw\includes;$(ProjectDir)Dependencies\atyp;$(ProjectDir)Dependencies\glcore;$(IncludePath);$(ProjectDir)Headers</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\glfw\includes;$(ProjectDir)Dependencies\atyp;$(ProjectDir)Dependencies\glcore;$(IncludePath);$(ProjectDir)Headers;$(ProjectDir)Dependencies\stbi</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
