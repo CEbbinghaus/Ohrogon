@@ -2,6 +2,7 @@
 #include <glfw3.h>
 #include <iostream>
 #include <chrono>
+#include <crtdbg.h>
 //#include <atyp_All.h>
 #include <atyp_Transform.h>
 #include <atyp_Math.h>
@@ -91,8 +92,8 @@ int main(){
 
 	Shader shader = Shader();
 
-	uint VertShader = shader.LoadShader("./Shaders/VertShader.shader", Shader::Type::Vertex);
-	uint FragShader = shader.LoadShader("./Shaders/FragShader.shader", Shader::Type::Frag);
+	uint VertShader = shader.LoadShader("./Shaders/VertShader.glsl", Shader::Type::Vertex);
+	uint FragShader = shader.LoadShader("./Shaders/FragShader.glsl", Shader::Type::Frag);
 
 	shader.CompileShader();
 
@@ -101,7 +102,10 @@ int main(){
 	//shader2.CompileShader({ VertShader, FragShader })
 
 
-	Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
+	Mesh prim = Primitive::Sphere(50, 50);//ModelLoader::LoadObj("./Meshes/Orb.obj");
+	prim.RecalculateNormals();
+
+	prim.transform.Position = Vector3::forward() * -10.0f;
 	//prim.FlatShade();
 	//prim.SetIndices(prim.Indices);
 
@@ -111,7 +115,6 @@ int main(){
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
 
-	if(!data)throw "Couldnt Find Image";
 	if(!data)throw "Couldnt Find Image";
 
 
@@ -192,7 +195,7 @@ int main(){
 
 		Time::Update();
 
-		if (Keyboard[KeyCode::ENTER] && Keyboard.ctrlKey && Keyboard.shiftKey) {
+		if (Keyboard[KeyCode::ENTER] && Keyboard.altKey && Keyboard.shiftKey) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 		/*if(done){
@@ -215,7 +218,7 @@ int main(){
 
 		f += Time::DeltaTime;
 
-		prim.transform.Rotation = Vector3::up() * f;
+		//prim.transform.Rotation = Vector3::up() * f;
 
 		if (f > 0.5f)
 			camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
@@ -290,6 +293,7 @@ int main(){
 
 		//cylinder.draw(MVPMatrixUniform, pv_M);
 
+		glBindTexture(GL_TEXTURE_2D, texture);
 		prim.draw(MVPMatrixUniform, pv_M);
 
 		glfwSwapBuffers(window);
