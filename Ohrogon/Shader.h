@@ -35,7 +35,7 @@ class Shader{
 			// Provide the infolog in whatever manor you deem best.
 			// Exit with failure.
 			glDeleteShader(id); // Don't leak the shader.
-			throw std::exception("Cannot Compile the Shader");
+			throw "Cannot Compile the Shader";
 
 			return 0;
 		}
@@ -60,7 +60,7 @@ class Shader{
 			delete[] errorLog;
 
 
-			throw std::exception("Cannot Link Shaders");
+			throw "Cannot Link Shaders";
 		}
 	}
 
@@ -87,12 +87,6 @@ public:
 	~Shader(){
 		glDeleteProgram(ProgrammID);
 	}
-
-	//static uint LoadShader(const char* filename, Type ShaderType) {
-	//	string source = LoadFile(filename);
-	//	uint id = CompileSource(source, (GLint)ShaderType);
-	//	return id;
-	//}
 
 	uint LoadShader(const char* filename, Type ShaderType){
 		string source = File::ReadText(filename);
@@ -130,20 +124,8 @@ public:
 		return ProgrammID;
 	}
 
-	//static uint CompileShader(std::initializer_list<uint> ids){
-	//	uint ProgrammID = glCreateProgram();
-	//	auto ptr = ids.begin();
-	//	while (ptr != ids.end()) {
-	//		glAttachShader(ProgrammID, *ptr);
-	//	}
-	//	glLinkProgram(ProgrammID);
-	//	AssertShaderErrors(ProgrammID);
-	//}
-
 	operator uint(){
 		return ProgrammID;
 	}
-
-	//~Shader() = default;
 };
 

@@ -174,14 +174,15 @@ public:
 		BindNormals();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), Normals.data());
+		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), UVs.data());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	void SetIndices(Array<uint> indxs) {
+		glBindVertexArray(VAO);
 		Indices = indxs;
-
 		BindIndices();
+		glBindVertexArray(0);
 	}
 
 	void SetVertices(Array<Vector3> verts) {
@@ -193,7 +194,7 @@ public:
 
 	void SetNormals(Array<Vector3> normals){
 		if (!normals.length) {
-			SetNormals(Vertices.map([](Vector3 v, int i) {return Vector3::one(); }));
+			//SetNormals(Vertices.map([]{return Vector3::one(); }));
 			return;
 		}
 
@@ -211,7 +212,7 @@ public:
 
 	void SetUVs(Array<Vector2> uvs){
 		if (!uvs.length) {
-			//SetNormals(Vertices.map([](Vector3 v, int i) {return Vector3::one(); }));
+			//SetUVs(Vertices.map<Vector2>([]{ return Vector2::one(); }));
 			return;
 		}
 
@@ -228,29 +229,38 @@ public:
 	}
 
 	void FlatShade() {
-		//Array<Vector3> oldVerts = Vertices;
-		//Array<uint> oldIndicies = Indices;
-		//
-		//Array<Vector3> newVerts;
-		//Array<uint> newIndicies;
-		//
-		//int i = 0;
-		//for (uint& index : oldIndicies){
-		//	newVerts.push(oldVerts[index]);
-		//	newIndicies.push(newVerts.length - 1);
-		//}
-		//
-		//SetVertices(Vertices);
-		SetIndices(Indices);
-		//RecalculateNormals();
+		Array<Vector3> oldVerts = Vertices;
+		Array<uint> oldIndicies = Indices;
+		Array<Vector2> oldUVs = UVs;
+		
+		Array<Vector3> newVerts;
+		Array<uint> newIndicies;
+		Array<Vector2> newUVs;
+
+		int i = 0;
+		for (uint& index : oldIndicies){
+			newVerts.push(oldVerts[index]);
+
+			if(newUVs.length)
+				newUVs.push(oldUVs[index]);
+
+			newIndicies.push(newVerts.length - 1);
+		}
+		
+		SetUVs(newUVs);
+		SetVertices(newVerts);
+		SetIndices(newIndicies);
+		RecalculateNormals();
 	}
 
 	void SmoothShade(){
 		Array<Vector3> oldVerts = Vertices;
 		Array<uint> oldIndicies = Indices;
+		Array<Vector2> oldUVs = UVs;
 
 		Array<Vector3> newVerts;
 		Array<uint> newIndicies;
+		Array<Vector2> newUVs;
 
 		int i = 0;
 		for (uint& index : oldIndicies) {
@@ -258,6 +268,10 @@ public:
 			index = newVerts.indexOf(b);
 			if (index == -1) {
 				newVerts.push(b);
+
+				if(newUVs.length)
+					newUVs.push(oldUVs[index]);
+
 				newIndicies.push(newVerts.length - 1);
 			}
 			else
@@ -266,6 +280,7 @@ public:
 
 		SetVertices(newVerts);
 		SetIndices(newIndicies);
+		SetUVs(newUVs);
 		RecalculateNormals();
 	}
 
@@ -318,7 +333,7 @@ public:
 			normals[i].normalise();
 		}*/
 
-		normals.forEach([](Vector3& Element, int index){
+		normals.forEach([](Vector3& Element){
 			Element.normalise();
 		});
 
