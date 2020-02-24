@@ -42,7 +42,7 @@ int main(){
 	if(glfwInit() == false)
 		return -1;
 
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "Ohrogon Engine", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Ohrogon Engine", nullptr, nullptr);
 
 	if(window == nullptr){
 		glfwTerminate(); return -2;
@@ -99,11 +99,12 @@ int main(){
 
 	//Shader shader2 = Shader();
 
+
 	//shader2.CompileShader({ VertShader, FragShader })
 
 
-	Mesh prim = Primitive::Sphere(50, 50);//ModelLoader::LoadObj("./Meshes/Orb.obj");
-	prim.RecalculateNormals();
+	Mesh prim = ModelLoader::LoadObj("./Meshes/OtherOrb.obj");
+	//prim.RecalculateNormals();
 
 	prim.transform.Position = Vector3::forward() * -10.0f;
 	//prim.FlatShade();
@@ -113,11 +114,11 @@ int main(){
 	//Mesh cylinder = Primitive::Cylinder(20);
 	//Mesh prim = Primitive::Cube();
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("./Textures/Image.png", &width, &height, &nrChannels, 0);
 
 	if(!data)throw "Couldnt Find Image";
 
-
+	
 	uint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -162,7 +163,7 @@ int main(){
 
 	glUseProgram(shader.ProgrammID);
 
-	glClearColor(0.30f, 0.30f, 0.40f, 1);
+	glClearColor(0.10f, 0.10f, 0.12f, 0);
 
 	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix"); 
 	auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");

@@ -157,7 +157,6 @@ public:
 			mesh.Vertices.push(Vector3(0.0f, .5f, 0.0f));
 
 			for(int h = 1; h < HeightSlices; ++h){
-				printf("Adding an Edge loop at Height: %f\n", (1 - (h / (float)HeightSlices)) - .5f);
 				for(int w = 0; w < RadiusSlices; ++w){
 					float height = 1 - (h / (float)HeightSlices);
 					float radius = w / (float)RadiusSlices;
@@ -203,7 +202,62 @@ public:
 
 			return mesh;
 		}
-	} raw;
+	
+		static MeshData Icosahedon(int refinement){
+			
+			MeshData mesh;
+			Array<Vector3>& vertices = mesh.Vertices;
+			float t = (1.0f + sqrtf(5.0f)) / 2.0f;
+
+			vertices.push(Vector3(-1, t, 0));
+			vertices.push(Vector3(1, t, 0));
+			vertices.push(Vector3(-1, -t, 0));
+			vertices.push(Vector3(1, -t, 0));
+						 
+			vertices.push(Vector3(0, -1, t));
+			vertices.push(Vector3(0, 1, t));
+			vertices.push(Vector3(0, -1, -t));
+			vertices.push(Vector3(0, 1, -t));
+						  
+			vertices.push(Vector3(t, 0, -1));
+			vertices.push(Vector3(t, 0, 1));
+			vertices.push(Vector3(-t, 0, -1));
+			vertices.push(Vector3(-t, 0, 1));
+
+			Array<uint>& indices = mesh.Indices;
+
+			indices.push({ 0, 11, 5 });
+			indices.push({ 0, 5, 1 });
+			indices.push({ 0, 1, 7 });
+			indices.push({ 0, 7, 10 });
+			indices.push({ 0, 10, 11 });
+
+			// 5 adjacent faces
+			indices.push({ 1, 5, 9 });
+			indices.push({ 5, 11, 4 });
+			indices.push({ 11, 10, 2 });
+			indices.push({ 10, 7, 6 });
+			indices.push({ 7, 1, 8 });
+
+			// 5 faces around point 3
+			indices.push({ 3, 9, 4 });
+			indices.push({ 3, 4, 2 });
+			indices.push({ 3, 2, 6 });
+			indices.push({ 3, 6, 8 });
+			indices.push({ 3, 8, 9 });
+
+			// 5 adjacent faces
+			indices.push({ 4, 9, 5 });
+			indices.push({ 2, 4, 11 });
+			indices.push({ 6, 2, 10 });
+			indices.push({ 8, 6, 7 });
+			indices.push({ 9, 8, 1 });
+
+
+			return mesh;
+
+		}
+} raw;
 
 	static Mesh Plane(uint faces) {
 		auto data = raw.Plane(faces);
@@ -242,6 +296,17 @@ public:
 		m.SetIndices(data.Indices);
 		m.SetNormals(data.Normals);
 		m.SetUVs(data.UVs);
+		return m;
+	}
+	
+	static Mesh Icosahedron(int faces){
+		MeshData data = raw.Icosahedon(faces);
+		Mesh m = Mesh();
+		m.SetVertices(data.Vertices);
+		m.SetIndices(data.Indices);
+		m.SetNormals(data.Normals);
+		m.SetUVs(data.UVs);
+		m.RecalculateNormals();
 		return m;
 	}
 };
