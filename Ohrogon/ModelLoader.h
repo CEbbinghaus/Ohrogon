@@ -146,8 +146,8 @@ public:
 					for (const char* index : *triangle){
 
 						bool doubleSlash = false;
-
 						Array<const char*> indexArgs;
+
 
 						if(Indexof(index, "//") == -1)
 							indexArgs = SplitString(index, '/', false);
@@ -163,7 +163,8 @@ public:
 								indices.push(std::stoi(indexArgs[0]) - 1);
 								break;
 							case 2:
-								indices.push(std::stoi(indexArgs[0]) - 1);
+								indices.push(indices.length);
+								VertexArray.push(vertexBuffer[std::stoi(indexArgs[0]) - 1]);
 								if (doubleSlash)
 									NormalArray.push(normalBuffer[std::stoi(indexArgs[1]) - 1]);
 								else
@@ -184,6 +185,9 @@ public:
 			}
 		}
 	
+		if(VertexArray.length == 0)
+			VertexArray = vertexBuffer;
+
 		Mesh m = Mesh();
 		m.SetVertices(VertexArray);
 		m.SetIndices(indices);

@@ -103,7 +103,7 @@ int main(){
 	//shader2.CompileShader({ VertShader, FragShader })
 
 
-	Mesh prim = ModelLoader::LoadObj("./Meshes/OtherOrb.obj");
+	Mesh prim = ModelLoader::LoadObj("./Meshes/Teapot.obj");
 	//prim.RecalculateNormals();
 
 	prim.transform.Position = Vector3::forward() * -10.0f;
@@ -114,7 +114,7 @@ int main(){
 	//Mesh cylinder = Primitive::Cylinder(20);
 	//Mesh prim = Primitive::Cube();
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("./Textures/Image.png", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
 
 	if(!data)throw "Couldnt Find Image";
 

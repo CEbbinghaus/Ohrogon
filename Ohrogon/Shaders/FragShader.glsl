@@ -18,7 +18,7 @@ void main(){
     //if (TextureColor.a > 0.0001)
     //    discard;
 
-    vec3 PixelColor = /*TextureColor.xyz + */((ScreenColor * normal * color) + vec3(.5));// * vec3(0.1));
+    vec3 PixelColor = TextureColor.xyz + ((ScreenColor * normal * color) * vec3(.1));// * vec3(0.1));
 
 	vec3 LitPixel = PixelColor * vec3(0.7);
 
