@@ -10,10 +10,12 @@ uniform mat4 ModelMatrix;
 out vec3 normal;
 out vec3 color;
 out vec2 TexCoord;
+out vec3 position;
 
 void main(){
 	gl_Position = MVPMatrix * vec4(VertPos, 1);
 	normal = normalize((ModelMatrix * vec4(VertNormal, 0)).xyz);
 	color = vec3(1);
 	TexCoord = VertUV;
+	position = gl_Position.xyz;
 }
