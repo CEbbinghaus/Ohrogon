@@ -21,6 +21,7 @@
 #include "Primitive.h"
 #include "Time.h"
 #include "ModelLoader.h"
+#include "Material.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -92,8 +93,8 @@ int main(){
 
 	Shader shader = Shader();
 
-	uint VertShader = shader.LoadShader("./Shaders/VertShader.glsl", Shader::Type::Vertex);
-	uint FragShader = shader.LoadShader("./Shaders/FragShader.glsl", Shader::Type::Frag);
+	uint VertShader = shader.LoadShader("./Shaders/VertShader.vert", Shader::Type::Vertex);
+	uint FragShader = shader.LoadShader("./Shaders/AltFragShader.frag", Shader::Type::Frag);
 
 	shader.CompileShader();
 
@@ -103,7 +104,7 @@ int main(){
 	//shader2.CompileShader({ VertShader, FragShader })
 
 
-	Mesh prim = ModelLoader::LoadObj("./Meshes/Teapot.obj");
+	Mesh prim = Primitive::Sphere(30, 30);//ModelLoader::LoadObj("./Meshes/Teapot.obj");
 	//prim.RecalculateNormals();
 
 	prim.transform.Position = Vector3::forward() * -10.0f;
@@ -134,6 +135,12 @@ int main(){
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(data);
+
+
+	Material m = Material(shader.ProgrammID);
+
+
+
 	//prim = ModelLoader::LoadObj("./Meshes/bear.obj");
 	
 	//Mesh* m{};
@@ -293,6 +300,8 @@ int main(){
 		//plane.draw(MVPMatrixUniform, pv_M);
 
 		//cylinder.draw(MVPMatrixUniform, pv_M);
+
+		m.Bind();
 
 		glBindTexture(GL_TEXTURE_2D, texture);
 		prim.draw(MVPMatrixUniform, pv_M);
