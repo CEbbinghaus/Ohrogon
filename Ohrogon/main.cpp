@@ -106,6 +106,8 @@ int main(){
 
 	Mesh prim = Primitive::Sphere(30, 30);//ModelLoader::LoadObj("./Meshes/Teapot.obj");
 	//prim.RecalculateNormals();
+	
+	prim.RecalculateNormals();
 
 	prim.transform.Position = Vector3::forward() * -10.0f;
 	//prim.FlatShade();

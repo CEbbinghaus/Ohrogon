@@ -23,7 +23,7 @@ public:
 	CameraType type;
 	
 	Matrix4 getViewMatrix(){
-		return (*(Matrix4*)&transform.updateTransform()).Invert();
+		return Matrix4::Invert(transform.updateTransform());
 	}
 
 	Matrix4 getProjectionMatrix(){
