@@ -104,10 +104,10 @@ int main(){
 	//shader2.CompileShader({ VertShader, FragShader })
 
 
-	Mesh prim = Primitive::Sphere(30, 30);//ModelLoader::LoadObj("./Meshes/Teapot.obj");
+	Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
 	//prim.RecalculateNormals();
 	
-	prim.RecalculateNormals();
+	//prim.RecalculateNormals();
 
 	prim.transform.Position = Vector3::forward() * -10.0f;
 	//prim.FlatShade();
@@ -305,7 +305,7 @@ int main(){
 
 		//cylinder.draw(MVPMatrixUniform, pv_M);
 
-		m.Bind();
+		//m.Bind();
 
 		glBindTexture(GL_TEXTURE_2D, texture);
 		prim.draw(MVPMatrixUniform, pv_M);
