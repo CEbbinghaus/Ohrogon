@@ -176,6 +176,7 @@ int main(){
 
 	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix"); 
 	auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
+	auto CameraPosition = glGetUniformLocation(shader.ProgrammID, "cameraPosition");
 	//auto TextureUniform = glGetUniformLocation(shader.ProgrammID, "Texture");
 
 	Camera cam;
@@ -297,6 +298,7 @@ int main(){
 		Matrix4 pv_M = cam.getPVMatrix();
 		glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
 		glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
+		glUniform3fv(CameraPosition, 1, (GLfloat*)&cam.transform.Position);
 		//glUniform1i(TextureUniform, )
 
 		//plane.draw(MVPMatrixUniform, pv_M);
