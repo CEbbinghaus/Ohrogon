@@ -18,7 +18,6 @@ struct MaterialProperties{
 
 class Material : public StructBuffer<MaterialProperties>{
 public:
-    uint bindingPoint = 1, buffer, blockIndex;
     Material(uint programm): StructBuffer(programm, "Material"){
 
         Ka = Vector3(0.5f, .0f, 0.5f);
@@ -28,14 +27,23 @@ public:
         Id = Vector3::one() - Vector3::forward();
         Is = Vector3::one() - Vector3::forward();
 
-        LightDirection = Vector3::up();
+        LightDirection = Vector3::up() + Vector3::forward();
 
         specularPower = 50.0f;
 
+        // Specify<Vector3>("Ka");
+        // Specify<Vector3>("Kd");
+        // Specify<Vector3>("Ks");
+        // Specify<Vector3>("Ia");
+        // Specify<Vector3>("Id");
+        // Specify<Vector3>("Is");
+        Specify<Vector3>("LightDirection", &LightDirection);
+
+        //Specify<float>("specularPower");
         // LightDirection.Print();
 
-        // blockIndex = glGetUniformBlockIndex(programmid, "Material");
-        // glUniformBlockBinding(programmid, blockIndex, bindingPoint);
+        // blockIndex = glGetUniformBlockIndex(programm, "Material");
+        // glUniformBlockBinding(programm, blockIndex, bindingPoint);
 
         // if((int)blockIndex == -1)
         //     #ifdef _DEBUG
@@ -48,7 +56,7 @@ public:
 
 
         // GLint blockSize;
-        // glGetActiveUniformBlockiv(programmid, blockIndex,
+        // glGetActiveUniformBlockiv(programm, blockIndex,
         // GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
 
         // // Query for the offsets of each block variable
@@ -56,10 +64,10 @@ public:
         // "Ks", "Ia", "Id", "Is", "LightDirection", "specularPower" };
 
         // GLuint indices[8];
-        // glGetUniformIndices(programmid, 8, names, indices);
+        // glGetUniformIndices(programm, 8, names, indices);
 
         // GLint offsets[8];
-        // glGetActiveUniformsiv(programmid, 8, indices,
+        // glGetActiveUniformsiv(programm, 8, indices,
         // GL_UNIFORM_OFFSET, offsets);
         
         // for(int i = 0; i < 8; ++i){

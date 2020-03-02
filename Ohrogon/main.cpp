@@ -140,6 +140,7 @@ int main(){
 
 
 	Material m = Material(shader.ProgrammID);
+	m.Bind();
 
 
 

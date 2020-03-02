@@ -13,9 +13,7 @@ public:
 		std::ifstream file(filepath);
 		std::stringstream fileData;
 
-
-		//Vertex Shader File Loading
-		if (file.is_open()) {
+		if (file.is_open() && file.good()) {
 			fileData << file.rdbuf();
 
 			file.close();
