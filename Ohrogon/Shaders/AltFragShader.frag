@@ -5,21 +5,21 @@ in vec2 TexCoord;
 in vec3 normal;
 in vec3 color;
 
-// uniform Material{
-//     vec3 LightDirection;
-//     vec3 Ka; // ambient material colour
-//     vec3 Kd; // diffuse material colour
-//     vec3 Ks; // specular material colour
-//     vec3 Ia; // ambient light colour
-//     vec3 Id; // diffuse light colour
-//     vec3 Is; // specular light colour
-//     float specularPower; // material specular power
-// };
-
-uniform ColorBlock {
-    vec4 diffuse;
-    vec4 ambient;
+uniform Material{
+    vec3 LightDirection;
+    vec3 Ka; // ambient material colour
+    vec3 Kd; // diffuse material colour
+    vec3 Ks; // specular material colour
+    vec3 Ia; // ambient light colour
+    vec3 Id; // diffuse light colour
+    vec3 Is; // specular light colour
+    float specularPower; // material specular power
 };
+
+// uniform ColorBlock {
+//     vec4 diffuse;
+//     vec4 ambient;
+// };
 
 //uniform PhongMaterial Material;
 uniform vec3 cameraPosition;
@@ -46,5 +46,5 @@ void main(){
   // vec3 diffuse = vec3(lambertTerm);
   // vec3 specular = Is * Ks * specularTerm;
 
-    FragColor = vec4(diffuse, 1);
+    FragColor = vec4(LightDirection, 1);
 }
