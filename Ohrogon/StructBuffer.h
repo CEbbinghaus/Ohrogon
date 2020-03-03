@@ -10,7 +10,7 @@ template <
     class = typename std::enable_if_t<std::is_class_v<T>, T>>
 class StructBuffer : public T
 {
-public:
+private:
     struct Variable
     {
         uint size;
@@ -62,7 +62,7 @@ public:
                             
     }
 
-public:
+protected:
     StructBuffer(uint ShaderProgramm, const char *name) : name(name)
     {
         glGetError();
@@ -128,38 +128,18 @@ public:
 public:
     void Bind()
     {
-        // GLuint bindingPoint = 1, buffer, blockIndex;
-        // float myFloats[8] = {1.0, 0.0, 0.0, 1.0,   0.4, 0.0, 0.0, 1.0};
-        
-        // blockIndex = glGetUniformBlockIndex(ProgramID, "ColorBlock");
-        // glUniformBlockBinding(ProgramID, blockIndex, bindingPoint);
-        
-        // glGenBuffers(1, &buffer);
-        // glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-        
-        // glBufferData(GL_UNIFORM_BUFFER, sizeof(myFloats), myFloats, GL_DYNAMIC_DRAW);
-        // glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, buffer);
-        // for(int i = 0; i < bufferSize / 4; ++i){
-        //     ((float*)buffer)[i] = 1.0f;
-        // }
-        //TODO: Push the Data to the Graphics Card
         for (int i = 0; i < variables.length; ++i)
         {
             auto& v = variables[i];
             memcpy((char*)data + v.offset, v.location, v.size);
 
-            printf("Index: %i Offset: %i\n", v.index, v.offset);
+            //printf("Index: %i Offset: %i\n", v.index, v.offset);
         }
 
 
         glBindBuffer(GL_UNIFORM_BUFFER, buffer);
         glBufferData(GL_UNIFORM_BUFFER, dataSize, data, GL_STATIC_DRAW);
         glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, buffer, 0, dataSize);
-
-        // glBindBuffer(GL_UNIFORM_BUFFER, bufferIndex);
-	    // glBufferData(GL_UNIFORM_BUFFER, bufferSize, &buffer, GL_STATIC_DRAW);
-	    // glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, bufferIndex, 0, sizeof(data));
-
     }
 };
 

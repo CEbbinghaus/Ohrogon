@@ -23,6 +23,7 @@
 #include "Time.h"
 #include "Window.h"
 #include "test.h"
+#include "Color.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -141,65 +142,7 @@ int main() {
   stbi_image_free(imageData);
 
 
-Material m = Material(shader.ProgrammID);
-//DataBuffer test = DataBuffer(shader.ProgrammID);
-  // Material m = Material(shader.ProgrammID);
-  // m.Bind();
-// 	float ColorData[] = {.0f, .5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-//   {
-//     struct data {
-//       Vector4 a;
-//       Vector4 b;
-//     };
-
-
-
-//     StructBuffer<data> buffer =
-//         StructBuffer<data>(shader.ProgrammID, "ColorBlock");
-
-// 	buffer.a = Vector4(.0f, .5f, 1.0f, 1.0f);
-// 	buffer.b = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
-//     buffer.Specify<Vector4>("diffuse");
-//     buffer.Specify<Vector4>("ambient");
-//     buffer.Bind();
-//   }
-
-//   {
-    
-//     GLuint UniformBlockIndex, buffer;
-//     GLint bindIndex = 1, UniformBufferSize;
-
-//     UniformBlockIndex = glGetUniformBlockIndex(shader.ProgrammID, "ColorBlock");
-//     glGetActiveUniformBlockiv(shader.ProgrammID, UniformBlockIndex,
-//                               GL_UNIFORM_BLOCK_DATA_SIZE, &UniformBufferSize);
-//     glUniformBlockBinding(shader.ProgrammID, UniformBlockIndex, bindIndex);
-
-//     glGenBuffers(1, &buffer);
-//     glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-
-//     glBufferData(GL_UNIFORM_BUFFER, UniformBufferSize, ColorData, GL_STATIC_DRAW);
-//     glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, buffer, 0,
-//                       UniformBufferSize);
-//   }
-
-  // prim = ModelLoader::LoadObj("./Meshes/bear.obj");
-
-  // Mesh* m{};
-  // bool done = false;
-
-  // void (*func)(Mesh*){
-  //	[](Mesh* m){
-  //		Mesh mesh = ModelLoader::LoadObj("./Meshes/teapot.obj");
-  //		m = new Mesh(mesh);
-  //		printf("Mesh Successfully loaded\n");
-  //	}
-  //};
-
-  // Thread<Mesh> t = Thread(func, done, m);
-
-  // prim.FlatShade();
-  // prim.SmoothShade();
+  Material m = Material(shader.ProgrammID);
 
   prim.transform.Scale = Vector3(10.0f);
 
@@ -337,7 +280,10 @@ Material m = Material(shader.ProgrammID);
     // cylinder.draw(MVPMatrixUniform, pv_M);
 
     // m.Bind();
+    float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
+    m.Ka = HSLtoRGB(Time, .2f, .2f);
 
+    m.Bind();
     glBindTexture(GL_TEXTURE_2D, texture);
     prim.draw(MVPMatrixUniform, pv_M);
 
