@@ -1,34 +1,35 @@
+#include <crtdbg.h>
 #include <gl_core_4_5.h>
 #include <glfw3.h>
-#include <iostream>
 #include <chrono>
-#include <crtdbg.h>
+#include <iostream>
 //#include <atyp_All.h>
-#include <atyp_Transform.h>
-#include <atyp_Math.h>
 #include <atyp_Array.h>
+#include <atyp_Math.h>
 #include <atyp_Threading.h>
+#include <atyp_Transform.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "Shader.h"
 #include "Camera.h"
-#include "Window.h"
 #include "KeyManager.h"
-#include "MouseManager.h"
-#include "Mesh.h"
-#include "Primitive.h"
-#include "Time.h"
-#include "ModelLoader.h"
 #include "Material.h"
+#include "Mesh.h"
+#include "ModelLoader.h"
+#include "MouseManager.h"
+#include "Primitive.h"
+#include "Shader.h"
+#include "Time.h"
+#include "Window.h"
+#include "test.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
 
-//bool IsActive = true;
+// bool IsActive = true;
 //
-//void window_focus_callback(GLFWwindow* window, int focused){
+// void window_focus_callback(GLFWwindow* window, int focused){
 //	if(focused){
 //		IsActive = true;// The window gained input focus
 //	} else{
@@ -37,289 +38,318 @@ using Clock = std::chrono::steady_clock;
 //	}
 //}
 
-int main(){
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+int main() {
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	if(glfwInit() == false)
-		return -1;
+  if (glfwInit() == false) return -1;
 
-	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Ohrogon Engine", nullptr, nullptr);
+  GLFWwindow *window =
+      glfwCreateWindow(1920, 1080, "Ohrogon Engine", nullptr, nullptr);
 
-	if(window == nullptr){
-		glfwTerminate(); return -2;
-	}
+  if (window == nullptr) {
+    glfwTerminate();
+    return -2;
+  }
 
-	glfwMakeContextCurrent(window);
+  glfwMakeContextCurrent(window);
 
-	if(ogl_LoadFunctions() == ogl_LOAD_FAILED){
-		glfwDestroyWindow(window);
-		glfwTerminate();
-		return -3;
-	}
+  if (ogl_LoadFunctions() == ogl_LOAD_FAILED) {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return -3;
+  }
 
-	//glfwSetWindowFocusCallback(window, window_focus_callback);
+  // glfwSetWindowFocusCallback(window, window_focus_callback);
 
-	auto major = ogl_GetMajorVersion();
-	auto minor = ogl_GetMinorVersion();
-	printf("Running OpenGL Version %i.%i\n", major, minor);
+  auto major = ogl_GetMajorVersion();
+  auto minor = ogl_GetMinorVersion();
+  printf("Running OpenGL Version %i.%i\n", major, minor);
 
-	//turn VSync off
-	//glfwSwapInterval(0);
+  // turn VSync off
+  // glfwSwapInterval(0);
 
-	//Key Manager Initialization
-	KeyManager& Keyboard = KeyManager::CreateKeyManager(window);
+  // Key Manager Initialization
+  KeyManager &Keyboard = KeyManager::CreateKeyManager(window);
 
-	//Mouse Configuration Options
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	if(glfwRawMouseMotionSupported())
-		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+  // Mouse Configuration Options
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  if (glfwRawMouseMotionSupported())
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-	//Mouse Initialization
-	MouseManager Mouse = MouseManager::CreateMouseManager(window);
+  // Mouse Initialization
+  MouseManager Mouse = MouseManager::CreateMouseManager(window);
 
+  //{
+  //	int x, y;
+  //	int width, height;
+  //	glfwGetWindowSize(window, &width, &height);
+  //	glfwGetWindowPos(window, &x, &y);
+  //	Window::Position.x = x;
+  //	Window::Position.y = y;
+  //	Window::Width = width;
+  //	Window::Height = height;
+  //	Window::aspectRatio = ((float)width / height);
+  //}
 
+  Shader shader = Shader();
 
-	//{
-	//	int x, y;
-	//	int width, height;
-	//	glfwGetWindowSize(window, &width, &height);
-	//	glfwGetWindowPos(window, &x, &y);
-	//	Window::Position.x = x;
-	//	Window::Position.y = y;
-	//	Window::Width = width;
-	//	Window::Height = height;
-	//	Window::aspectRatio = ((float)width / height);
-	//}
+  uint VertShader =
+      shader.LoadShader("./Shaders/VertShader.vert", Shader::Type::Vertex);
+  uint FragShader =
+      shader.LoadShader("./Shaders/AltFragShader.frag", Shader::Type::Frag);
 
-	Shader shader = Shader();
+  shader.CompileShader();
 
-	uint VertShader = shader.LoadShader("./Shaders/VertShader.vert", Shader::Type::Vertex);
-	uint FragShader = shader.LoadShader("./Shaders/AltFragShader.frag", Shader::Type::Frag);
+  // Shader shader2 = Shader();
 
-	shader.CompileShader();
+  // shader2.CompileShader({ VertShader, FragShader })
 
-	//Shader shader2 = Shader();
+  Mesh prim = ModelLoader::LoadObj("./Meshes/Bunny.obj");
+  prim.RecalculateNormals();
+  // prim.RecalculateNormals();
 
+  // prim.RecalculateNormals();
 
-	//shader2.CompileShader({ VertShader, FragShader })
+  //prim.transform.Position = Vector3::forward() * -10.0f;
+  // prim.FlatShade();
+  // prim.SetIndices(prim.Indices);
 
+  // Mesh plane = Primitive::Plane(1);
+  // Mesh cylinder = Primitive::Cylinder(20);
+  // Mesh prim = Primitive::Cube();
+  int width, height, nrChannels;
+  unsigned char *imageData =
+      stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
 
-	Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
-	//prim.RecalculateNormals();
-	
-	//prim.RecalculateNormals();
+  if (!imageData) throw "Couldnt Find Image";
 
-	prim.transform.Position = Vector3::forward() * -10.0f;
-	//prim.FlatShade();
-	//prim.SetIndices(prim.Indices);
+  uint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glActiveTexture(GL_TEXTURE_2D);
 
-	//Mesh plane = Primitive::Plane(1);
-	//Mesh cylinder = Primitive::Cylinder(20);
-	//Mesh prim = Primitive::Cube();
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	if(!data)throw "Couldnt Find Image";
+  int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
+  glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels,
+               GL_UNSIGNED_BYTE, imageData);
+  glGenerateMipmap(GL_TEXTURE_2D);
 
-	
-	uint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glActiveTexture(GL_TEXTURE_2D);
+  stbi_image_free(imageData);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
-	glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+Material m = Material(shader.ProgrammID);
+//DataBuffer test = DataBuffer(shader.ProgrammID);
+  // Material m = Material(shader.ProgrammID);
+  // m.Bind();
+// 	float ColorData[] = {.0f, .5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+//   {
+//     struct data {
+//       Vector4 a;
+//       Vector4 b;
+//     };
 
-	stbi_image_free(data);
 
 
-	Material m = Material(shader.ProgrammID);
-	m.Bind();
+//     StructBuffer<data> buffer =
+//         StructBuffer<data>(shader.ProgrammID, "ColorBlock");
 
+// 	buffer.a = Vector4(.0f, .5f, 1.0f, 1.0f);
+// 	buffer.b = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
+//     buffer.Specify<Vector4>("diffuse");
+//     buffer.Specify<Vector4>("ambient");
+//     buffer.Bind();
+//   }
+
+//   {
+    
+//     GLuint UniformBlockIndex, buffer;
+//     GLint bindIndex = 1, UniformBufferSize;
+
+//     UniformBlockIndex = glGetUniformBlockIndex(shader.ProgrammID, "ColorBlock");
+//     glGetActiveUniformBlockiv(shader.ProgrammID, UniformBlockIndex,
+//                               GL_UNIFORM_BLOCK_DATA_SIZE, &UniformBufferSize);
+//     glUniformBlockBinding(shader.ProgrammID, UniformBlockIndex, bindIndex);
 
-	//prim = ModelLoader::LoadObj("./Meshes/bear.obj");
-	
-	//Mesh* m{};
-	//bool done = false;
+//     glGenBuffers(1, &buffer);
+//     glBindBuffer(GL_UNIFORM_BUFFER, buffer);
 
-	//void (*func)(Mesh*){
-	//	[](Mesh* m){
-	//		Mesh mesh = ModelLoader::LoadObj("./Meshes/teapot.obj");
-	//		m = new Mesh(mesh);
-	//		printf("Mesh Successfully loaded\n");
-	//	}
-	//};
+//     glBufferData(GL_UNIFORM_BUFFER, UniformBufferSize, ColorData, GL_STATIC_DRAW);
+//     glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, buffer, 0,
+//                       UniformBufferSize);
+//   }
 
-	//Thread<Mesh> t = Thread(func, done, m);
-	
+  // prim = ModelLoader::LoadObj("./Meshes/bear.obj");
 
+  // Mesh* m{};
+  // bool done = false;
 
-	//prim.FlatShade();
-	//prim.SmoothShade();
+  // void (*func)(Mesh*){
+  //	[](Mesh* m){
+  //		Mesh mesh = ModelLoader::LoadObj("./Meshes/teapot.obj");
+  //		m = new Mesh(mesh);
+  //		printf("Mesh Successfully loaded\n");
+  //	}
+  //};
 
-	prim.transform.Scale = Vector3(5.0f);
+  // Thread<Mesh> t = Thread(func, done, m);
 
+  // prim.FlatShade();
+  // prim.SmoothShade();
 
-	bool Wireframe = false;
-	
-	bool FlatShaded = false;
+  prim.transform.Scale = Vector3(10.0f);
 
-	glUseProgram(shader.ProgrammID);
+  bool Wireframe = false;
 
-	glClearColor(0.10f, 0.10f, 0.12f, 0);
+  bool FlatShaded = false;
 
-	auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix"); 
-	auto ModelMatrixUniform = glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
-	auto CameraPosition = glGetUniformLocation(shader.ProgrammID, "cameraPosition");
-	//auto TextureUniform = glGetUniformLocation(shader.ProgrammID, "Texture");
+  glUseProgram(shader.ProgrammID);
 
-	Camera cam;
+  glClearColor(0.10f, 0.10f, 0.12f, 0);
 
-	cam.fov = 1.207f;
-	cam.aspectRatio = 16 / 9.0f;
-	cam.NearPlane = 0.01f;
-	cam.FarPlane = 100000.0f;
+  auto MVPMatrixUniform = glGetUniformLocation(shader.ProgrammID, "MVPMatrix");
+  auto ModelMatrixUniform =
+      glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
+  auto CameraPosition =
+      glGetUniformLocation(shader.ProgrammID, "cameraPosition");
+  // auto TextureUniform = glGetUniformLocation(shader.ProgrammID, "Texture");
 
-	//plane.transform.Scale = Vector3::one() * 10.0f;
-	//plane.transform.Position = Vector3(-.5f, 0, -.5f);
+  Camera cam;
 
-	float f = 0.0f;
-	Vector2 camRotation(0.0f, 0.0f);
+  cam.fov = 1.207f;
+  cam.aspectRatio = 16 / 9.0f;
+  cam.NearPlane = 0.01f;
+  cam.FarPlane = 100000.0f;
 
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glCullFace(GL_BACK);
-	glPolygonMode(GL_FRONT, GL_FILL);
+  // plane.transform.Scale = Vector3::one() * 10.0f;
+  // plane.transform.Position = Vector3(-.5f, 0, -.5f);
 
-	while (glfwWindowShouldClose(window) == false && !(Keyboard.altKey && Keyboard.shiftKey && Keyboard[KeyCode::DELETE_Key])) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//if(IsActive){
-			glfwPollEvents();
-			Keyboard.Update();
-		//}
+  float f = 0.0f;
+  Vector2 camRotation(0.0f, 0.0f);
 
-		Time::Update();
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glCullFace(GL_BACK);
+  glPolygonMode(GL_FRONT, GL_FILL);
 
-		if (Keyboard[KeyCode::ENTER] && Keyboard.altKey && Keyboard.shiftKey) {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		}
-		/*if(done){
-			printf("Done Flag set\n");
-			done = false;
-			prim = *m;
-		}*/
+  while (glfwWindowShouldClose(window) == false &&
+         !(Keyboard.altKey && Keyboard.shiftKey &&
+           Keyboard[KeyCode::DELETE_Key])) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // if(IsActive){
+    glfwPollEvents();
+    Keyboard.Update();
+    //}
 
-		//{
-		//	int x, y;
-		//	int width, height;
-		//	glfwGetWindowSize(window, &width, &height);
-		//	glfwGetWindowPos(window, &x, &y);
-		//	Window::Position.x = x;
-		//	Window::Position.y = y;
-		//	Window::Width = width;
-		//	Window::Height = height;
-		//	Window::aspectRatio = ((float)width / height);
-		//}
+    Time::Update();
 
-		f += Time::DeltaTime;
+    if (Keyboard[KeyCode::ENTER] && Keyboard.altKey && Keyboard.shiftKey) {
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    /*if(done){
+                    printf("Done Flag set\n");
+                    done = false;
+                    prim = *m;
+    }*/
 
-		//prim.transform.Rotation = Vector3::up() * f;
+    //{
+    //	int x, y;
+    //	int width, height;
+    //	glfwGetWindowSize(window, &width, &height);
+    //	glfwGetWindowPos(window, &x, &y);
+    //	Window::Position.x = x;
+    //	Window::Position.y = y;
+    //	Window::Width = width;
+    //	Window::Height = height;
+    //	Window::aspectRatio = ((float)width / height);
+    //}
 
-		if (f > 0.5f)
-			camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
+    f += Time::DeltaTime;
 
-		
-		camRotation.y = Math::clamp(camRotation.y, -1.2f,1.2f);
+    // prim.transform.Rotation = Vector3::up() * f;
 
-		cam.transform.Rotation = Quaternion::euler(camRotation.y, camRotation.x, 0.0f);
+    if (f > 0.5f) camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
 
+    camRotation.y = Math::clamp(camRotation.y, -1.2f, 1.2f);
 
-		Vector3 forward = cam.transform.forward();
-		Vector3 right = cam.transform.right();
-		Vector3 up = Vector3::up();
-		
-		Vector3 movement;
+    cam.transform.Rotation =
+        Quaternion::euler(camRotation.y, camRotation.x, 0.0f);
 
-		if (Keyboard['w'])
-			movement += forward * 0.1;
+    Vector3 forward = cam.transform.forward();
+    Vector3 right = cam.transform.right();
+    Vector3 up = Vector3::up();
 
-		if (Keyboard['s'])
-			movement += -forward * 0.1;
+    Vector3 movement;
 
-		if (Keyboard['d'])
-			movement += -right * 0.1;
+    if (Keyboard['w']) movement += forward * 0.1;
 
-		if (Keyboard['a'])
-			movement += right * 0.1;
+    if (Keyboard['s']) movement += -forward * 0.1;
 
-		if (Keyboard[' '])
-			movement += up * 0.1;
+    if (Keyboard['d']) movement += -right * 0.1;
 
-		if (Keyboard[KeyCode::LEFT_CONTROL])
-			movement += -up * 0.1;
+    if (Keyboard['a']) movement += right * 0.1;
 
-		if(Keyboard.pressed['m']){
-			if (Wireframe) {
-				glEnable(GL_CULL_FACE);
-				glPolygonMode(GL_FRONT, GL_FILL);
-				Wireframe = false;
-			}else {
-				glDisable(GL_CULL_FACE);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				Wireframe = true;
-			}
-		}
+    if (Keyboard[' ']) movement += up * 0.1;
 
+    if (Keyboard[KeyCode::LEFT_CONTROL]) movement += -up * 0.1;
 
-		if (Keyboard.pressed['l']) {
-			if (FlatShaded) {
-				prim.FlatShade();
-				FlatShaded = false;
-			}
-			else {
-				prim.SmoothShade();
-				FlatShaded = true;
-			}
-		}
+    if (Keyboard.pressed['m']) {
+      if (Wireframe) {
+        glEnable(GL_CULL_FACE);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        Wireframe = false;
+      } else {
+        glDisable(GL_CULL_FACE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        Wireframe = true;
+      }
+    }
 
-		if(Keyboard[KeyCode::ESCAPE]){
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
+    if (Keyboard.pressed['l']) {
+      if (FlatShaded) {
+        prim.FlatShade();
+        FlatShaded = false;
+      } else {
+        prim.SmoothShade();
+        FlatShaded = true;
+      }
+    }
 
-		cam.transform.Position += movement * Time::OneTime;
+    if (Keyboard[KeyCode::ESCAPE]) {
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 
-		Matrix4 ModelMatrix = prim.transform.updateTransform();
-		Matrix4 pv_M = cam.getPVMatrix();
-		glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
-		glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
-		glUniform3fv(CameraPosition, 1, (GLfloat*)&cam.transform.Position);
-		//glUniform1i(TextureUniform, )
+    cam.transform.Position += movement * Time::OneTime;
 
-		//plane.draw(MVPMatrixUniform, pv_M);
+    Matrix4 ModelMatrix = prim.transform.updateTransform();
+    Matrix4 pv_M = cam.getPVMatrix();
+    glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
+    glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
+    glUniform3fv(CameraPosition, 1, (GLfloat*)&cam.transform.Position);
+    // glUniform1i(TextureUniform, )
 
-		//cylinder.draw(MVPMatrixUniform, pv_M);
+    // plane.draw(MVPMatrixUniform, pv_M);
 
-		//m.Bind();
+    // cylinder.draw(MVPMatrixUniform, pv_M);
 
-		glBindTexture(GL_TEXTURE_2D, texture);
-		prim.draw(MVPMatrixUniform, pv_M);
+    // m.Bind();
 
-		glfwSwapBuffers(window);
-		
-		MouseCallbackHelper::Callback(window);
-	}
+    glBindTexture(GL_TEXTURE_2D, texture);
+    prim.draw(MVPMatrixUniform, pv_M);
 
-	Keyboard.DestroyKeyManager();
-	Mouse.DestroyMouseManager();
+    glfwSwapBuffers(window);
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
-	return 0;
+    MouseCallbackHelper::Callback(window);
+  }
+
+  Keyboard.DestroyKeyManager();
+  Mouse.DestroyMouseManager();
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
+  return 0;
 }
