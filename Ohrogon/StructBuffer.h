@@ -1,8 +1,6 @@
 #pragma once;
 
 #include <gl_core_4_5.h>
-
-#include <atyp_Vector4.h>
 #include <atyp_Array.h>
 
 using uint = unsigned int;
@@ -12,7 +10,7 @@ template <
     class = typename std::enable_if_t<std::is_class_v<T>, T>>
 class StructBuffer : public T
 {
-private:
+public:
     struct Variable
     {
         uint size;
@@ -28,50 +26,32 @@ private:
     const char *name;
     uint ProgramID;
 
-    int bindIndex;
+    int bindIndex = 1;
     uint blockIndex;
-    uint bufferSize;
-    uint bufferIndex;
+    int dataSize;
+    uint buffer;
 
-    void* buffer;
+    void* data;
 
     Array<Variable> variables;
 
     void AllocateData()
     {
         blockIndex = glGetUniformBlockIndex(ProgramID, name);
+        bindIndex = HighestBindIndex++;
 
-        printf("Block Index is: %i\n", blockIndex);
-
-        uint Error = glGetError();
-
-        if (Error == GL_INVALID_OPERATION)
-            throw "Programm id is Invalid or Has not yet been Linked";
-        if (Error == GL_INVALID_INDEX)
-            throw "Name Does not exist in Shader Programm";
-
-        glGetActiveUniformBlockiv(ProgramID, blockIndex,
-        GL_UNIFORM_BLOCK_DATA_SIZE, (GLint*)&bufferSize);
-
-        Error = glGetError();
-        
-        glGetActiveUniformBlockiv(ProgramID,
-            blockIndex,
-            GL_UNIFORM_BLOCK_BINDING,
-            &bindIndex);
-
-        printf("Binding Point is: %i\n", bindIndex);
-
-        Error = glGetError();
-
-        buffer = malloc(bufferSize);
-        glGenBuffers(1, &bufferIndex);
+        glGetActiveUniformBlockiv(ProgramID, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &dataSize);
 
         glUniformBlockBinding(ProgramID, blockIndex, bindIndex);
+        
+        // glGetActiveUniformBlockiv(ProgramID,
+        //     blockIndex,
+        //     GL_UNIFORM_BLOCK_BINDING,
+        //     &bindIndex);
 
-        Error = glGetError();
+        glGenBuffers(1, &buffer);
 
-        if(Error != GL_NO_ERROR)throw "SOMETHING";
+        data = malloc(dataSize);
     }
 
     void GetDataLocation(const char* name, uint& index, uint& offset){
@@ -82,7 +62,7 @@ private:
                             
     }
 
-protected:
+public:
     StructBuffer(uint ShaderProgramm, const char *name) : name(name)
     {
         glGetError();
@@ -102,7 +82,7 @@ protected:
     }
 
     ~StructBuffer(){
-        free(buffer);
+        free(data);
     }
 
     /* Specify<T>(const char* name)
@@ -162,18 +142,24 @@ public:
         // for(int i = 0; i < bufferSize / 4; ++i){
         //     ((float*)buffer)[i] = 1.0f;
         // }
-        // //TODO: Push the Data to the Graphics Card
-        // // for (int i = 0; i < variables.length; ++i)
-        // // {
-        // //     auto& v = variables[i];
-        // //     memcpy((char*)buffer + v.offset, v.location, v.size);
+        //TODO: Push the Data to the Graphics Card
+        for (int i = 0; i < variables.length; ++i)
+        {
+            auto& v = variables[i];
+            memcpy((char*)data + v.offset, v.location, v.size);
 
-        // //     printf("Index: %i Offset: %i\n", v.index, v.offset);
-        // // }
+            printf("Index: %i Offset: %i\n", v.index, v.offset);
+        }
+
+
+        glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+        glBufferData(GL_UNIFORM_BUFFER, dataSize, data, GL_STATIC_DRAW);
+        glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, buffer, 0, dataSize);
 
         // glBindBuffer(GL_UNIFORM_BUFFER, bufferIndex);
-        // glBufferData(GL_UNIFORM_BUFFER, bufferSize, &buffer, GL_DYNAMIC_DRAW);
-        // glBindBufferBase(GL_UNIFORM_BUFFER, bindIndex, bufferIndex);
+	    // glBufferData(GL_UNIFORM_BUFFER, bufferSize, &buffer, GL_STATIC_DRAW);
+	    // glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, bufferIndex, 0, sizeof(data));
+
     }
 };
 

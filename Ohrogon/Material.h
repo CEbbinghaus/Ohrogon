@@ -27,19 +27,19 @@ public:
         Id = Vector3::one() - Vector3::forward();
         Is = Vector3::one() - Vector3::forward();
 
-        LightDirection = Vector3::up() + Vector3::forward();
+        LightDirection = Vector3(0.7f, 0.5f, 0.2f);
 
-        specularPower = 50.0f;
+        specularPower = 32.0f;
 
-        // Specify<Vector3>("Ka");
-        // Specify<Vector3>("Kd");
-        // Specify<Vector3>("Ks");
-        // Specify<Vector3>("Ia");
-        // Specify<Vector3>("Id");
-        // Specify<Vector3>("Is");
-        Specify<Vector3>("LightDirection", &LightDirection);
+        Specify<Vector3>("Ka");
+        Specify<Vector3>("Kd");
+        Specify<Vector3>("Ks");
+        Specify<Vector3>("Ia");
+        Specify<Vector3>("Id");
+        Specify<Vector3>("Is");
+        Specify<Vector3>("LightDirection");
+        Specify<float>("specularPower");
 
-        //Specify<float>("specularPower");
         // LightDirection.Print();
 
         // blockIndex = glGetUniformBlockIndex(programm, "Material");
@@ -78,6 +78,7 @@ public:
 
         //TODO: Properly Bind Uniform Block Data
         //glGetActiveUniformBlockiv(programmid, blockIndex, )
+        Bind();
     }
     
     // void Bind(){

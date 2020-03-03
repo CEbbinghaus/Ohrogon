@@ -17,5 +17,5 @@ void main(){
 	normal = normalize((ModelMatrix * vec4(VertNormal, 0)).xyz);
 	color = vec3(1);
 	TexCoord = VertUV;
-	position = gl_Position.xyz;
+	position = (ModelMatrix * vec4(VertPos,1)).xyz;
 }
