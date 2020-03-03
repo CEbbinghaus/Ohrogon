@@ -20,14 +20,14 @@ class Material : public StructBuffer<MaterialProperties>{
 public:
     Material(uint programm): StructBuffer(programm, "Material"){
 
-        Ka = Vector3(0.5f, .0f, 0.5f);
+        Ka = Vector3::one() / 2;
         Kd = Vector3::one();
         Ks = Vector3::one();
         Ia = Vector3::one();
-        Id = Vector3::one() - Vector3::forward();
-        Is = Vector3::one() - Vector3::forward();
+        Id = Vector3::one();
+        Is = Vector3::one();
 
-        LightDirection = Vector3(0.7f, 0.5f, 0.2f);
+        LightDirection = -Vector3::up();
 
         specularPower = 32.0f;
 
@@ -39,51 +39,6 @@ public:
         Specify<Vector3>("Is");
         Specify<Vector3>("LightDirection");
         Specify<float>("specularPower");
-
-        // LightDirection.Print();
-
-        // blockIndex = glGetUniformBlockIndex(programm, "Material");
-        // glUniformBlockBinding(programm, blockIndex, bindingPoint);
-
-        // if((int)blockIndex == -1)
-        //     #ifdef _DEBUG
-        //         throw "Could not find Block Index";
-        //     #else
-        //         return;
-        //     #endif
-
-        // glGenBuffers(1, &buffer);
-
-
-        // GLint blockSize;
-        // glGetActiveUniformBlockiv(programm, blockIndex,
-        // GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-
-        // // Query for the offsets of each block variable
-        // const GLchar *names[] = { "Ka", "Kd",
-        // "Ks", "Ia", "Id", "Is", "LightDirection", "specularPower" };
-
-        // GLuint indices[8];
-        // glGetUniformIndices(programm, 8, names, indices);
-
-        // GLint offsets[8];
-        // glGetActiveUniformsiv(programm, 8, indices,
-        // GL_UNIFORM_OFFSET, offsets);
-        
-        // for(int i = 0; i < 8; ++i){
-        //     int index = indices[i];
-        //     int offset = offsets[i];
-        //     printf("Index: %i Offset: %i", index, offset);
-        // }
-
-        //TODO: Properly Bind Uniform Block Data
-        //glGetActiveUniformBlockiv(programmid, blockIndex, )
-        Bind();
     }
     
-    // void Bind(){
-    //     glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-    //     glBufferData(GL_UNIFORM_BUFFER, sizeof(MaterialProperties), &Ka, GL_STATIC_DRAW);
-    //     glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, buffer);
-    // }
 };
