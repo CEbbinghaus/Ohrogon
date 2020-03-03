@@ -4,10 +4,14 @@ in vec3 position;
 in vec2 TexCoord;
 in vec3 normal;
 in vec3 color;
-// uniform ColorBlock {
-//     vec3 diffuse;
-//     vec3 ambient;
-// };
+in vec3 Tangent;
+in vec3 BiTangent;
+
+uniform int LightCount;
+uniform Light{
+  vec3 position;
+  float intensity;
+} Lights[];
 
 uniform Material{
     vec3 Ka; // ambient material colour
@@ -33,9 +37,9 @@ uniform sampler2D Texture;
 out vec4 FragColor;
 
 void main(){
-
+  vec4 texCol = texture(Texture, TexCoord );
     
-    //ensure normal and light direction are normalised
+  //ensure normal and light direction are normalised
   vec3 N = normalize(normal);
   vec3 L = normalize(LightDirection);
   // calculate lambert term (negate light direction)
@@ -50,5 +54,5 @@ void main(){
   vec3 diffuse = Id * Kd  * lambertTerm;
   vec3 specular = Is * Ks * specularTerm;
 
-  FragColor = vec4(ambient + diffuse + specular, 1);
+  FragColor = texCol * vec4(ambient + diffuse + specular, 1);
 }

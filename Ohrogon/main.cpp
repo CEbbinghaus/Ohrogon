@@ -66,6 +66,8 @@ int main() {
   auto minor = ogl_GetMinorVersion();
   printf("Running OpenGL Version %i.%i\n", major, minor);
 
+  stbi_set_flip_vertically_on_load(true);
+
   // turn VSync off
   // glfwSwapInterval(0);
 
@@ -105,8 +107,12 @@ int main() {
 
   // shader2.CompileShader({ VertShader, FragShader })
 
-  Mesh prim = ModelLoader::LoadObj("./Meshes/Bunny.obj");
-  prim.RecalculateNormals();
+  Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
+  //prim.RecalculateNormals();
+
+  prim.CalculateTangents();
+
+  prim.transform.Scale = Vector3(5.0f);
   // prim.RecalculateNormals();
 
   // prim.RecalculateNormals();
@@ -143,8 +149,6 @@ int main() {
 
 
   Material m = Material(shader.ProgrammID);
-
-  prim.transform.Scale = Vector3(10.0f);
 
   bool Wireframe = false;
 
@@ -280,8 +284,8 @@ int main() {
     // cylinder.draw(MVPMatrixUniform, pv_M);
 
     // m.Bind();
-    float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
-    m.Ka = HSLtoRGB(Time, .2f, .2f);
+    // float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
+    // m.Ka = HSLtoRGB(Time, .2f, .2f);
 
     m.Bind();
     glBindTexture(GL_TEXTURE_2D, texture);

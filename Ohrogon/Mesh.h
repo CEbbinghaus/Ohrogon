@@ -10,6 +10,8 @@ struct MeshData{
 	Array<Vector3> Vertices;
 	Array<Vector3> Normals;
 	Array<Vector3> Colors;
+	Array<Vector3> Tangents;
+	Array<Vector3> BiTangents;
 	Array<Vector2> UVs;
 
 	Array<uint> Indices;
@@ -120,16 +122,36 @@ public:
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
+		uint length = Vertices.length * sizeof(Vector3);
+
 		glDisableVertexAttribArray(1);
 		if (Normals.length) {
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(Vertices.length * sizeof(Vector3)));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
 			glEnableVertexAttribArray(1);
+
+			length += Normals.length * sizeof(Vector3);
 		}
 
 		glDisableVertexAttribArray(2);
 		if (UVs.length) {
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)((Vertices.length + Normals.length) * sizeof(Vector3)));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)(length));
 			glEnableVertexAttribArray(2);
+			
+			length += UVs.length * sizeof(Vector2);
+		}
+
+		if(Tangents.length){
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
+			glEnableVertexAttribArray(2);
+
+			length += Tangents.length * sizeof(Vector3);
+		}
+
+		if(BiTangents.length){
+			glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
+			glEnableVertexAttribArray(2);
+
+			length += BiTangents.length * sizeof(Vector3);
 		}
 		
  		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -178,6 +200,22 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
+	void BindTangents(){
+		BindUVs();
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length) * sizeof(Vector3) + (UVs.length) * sizeof(Vector2), Tangents.length * sizeof(Vector3), Tangents.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void BindBiTangents(){
+		BindTangents();
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length + Tangents.length) * sizeof(Vector3) + (UVs.length) * sizeof(Vector2), BiTangents.length * sizeof(Vector3), BiTangents.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
 	void SetIndices(Array<uint> indxs) {
 		glBindVertexArray(VAO);
 		Indices = indxs;
@@ -193,14 +231,7 @@ public:
 	}
 
 	void SetNormals(Array<Vector3> normals){
-		if (!normals.length) {
-			//SetNormals(Vertices.map([]{return Vector3::one(); }));
-			return;
-		}
-
-
-		//if (normals.length != Vertices.length)
-		//	throw "Normals and Vertices Must have the same length";
+		//if (!normals.length)return;
 
 		Normals = normals;
 
@@ -211,19 +242,30 @@ public:
 	}
 
 	void SetUVs(Array<Vector2> uvs){
-		if (!uvs.length) {
-			//SetUVs(Vertices.map<Vector2>([]{ return Vector2::one(); }));
-			return;
-		}
-
-
-		//if (uvs.length != Vertices.length)
-		//	throw "Normals and Vertices Must have the same length";
+		//if (!uvs.length) return;
 
 		UVs = uvs;
 
 		glBindVertexArray(VAO);
 		BindUVs();
+		UpdateVertexAttributes();
+		glBindVertexArray(0);
+	}
+
+	void SetTangents(const Array<Vector3>& tangents){
+		Tangents = tangents;
+
+		glBindVertexArray(VAO);
+		BindTangents();
+		UpdateVertexAttributes();
+		glBindVertexArray(0);
+	}
+
+	void SetBiTangents(const Array<Vector3>& bitangents){
+		BiTangents = bitangents;
+
+		glBindVertexArray(VAO);
+		BindBiTangents();
 		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
@@ -241,8 +283,7 @@ public:
 		for (uint& index : oldIndicies){
 			newVerts.push(oldVerts[index]);
 
-			if(newUVs.length)
-				newUVs.push(oldUVs[index]);
+			newUVs.push(oldUVs[index]);
 
 			newIndicies.push(newVerts.length - 1);
 		}
@@ -265,17 +306,16 @@ public:
 		int i = 0;
 		for (uint& index : oldIndicies) {
 			Vector3 b = oldVerts[index];
-			index = newVerts.indexOf(b);
-			if (index == -1) {
+			int indx = newVerts.indexOf(b);
+			if (indx == -1) {
 				newVerts.push(b);
 
-				if(newUVs.length)
-					newUVs.push(oldUVs[index]);
+				newUVs.push(oldUVs[index]);
 
 				newIndicies.push(newVerts.length - 1);
 			}
 			else
-				newIndicies.push(index);
+				newIndicies.push(indx);
 		}
 
 		SetVertices(newVerts);
@@ -338,6 +378,32 @@ public:
 		});
 
 		SetNormals(normals);
+	}
+
+	void CalculateTangents(){
+		if(UVs.isEmpty())return;
+
+		Array<Vector3> TangentBuffer;
+		Array<Vector3> BiTangentBuffer;
+
+		for(int i = 0; i < Indices.length - 3; i += 3){
+			Vector3 PositionDelta1 = Vertices[i + 1] - Vertices[i];
+			Vector3 PositionDelta2 = Vertices[i + 2] - Vertices[i];
+
+			Vector2 UVDelta1 = UVs[i + 1] - UVs[i];
+			Vector2 UVDelta2 = UVs[i + 2] - UVs[i];
+
+			float r = 1.0f / (UVDelta1.x * UVDelta2.y - UVDelta1.y * UVDelta2.x);
+			
+			Vector3 Tangent = (PositionDelta1 * UVDelta2.y - PositionDelta2 * UVDelta1.y) * r;
+			Vector3 BiTangent = (PositionDelta2 * UVDelta1.x - PositionDelta1 * UVDelta2.x) * r;
+
+			TangentBuffer.push({Tangent, Tangent, Tangent});
+			BiTangentBuffer.push({BiTangent, BiTangent, BiTangent});
+		}
+
+		SetTangents(TangentBuffer);
+		SetBiTangents(BiTangentBuffer);
 	}
 
 	//Mesh& operator=(const Mesh& original){
