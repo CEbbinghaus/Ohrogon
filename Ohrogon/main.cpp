@@ -68,6 +68,8 @@ int main() {
 
   stbi_set_flip_vertically_on_load(true);
 
+  printf("Floor of Inifinity: %f\n", -INFINITY - floorf(-INFINITY));
+
   // turn VSync off
   // glfwSwapInterval(0);
 
@@ -97,9 +99,9 @@ int main() {
   Shader shader = Shader();
 
   uint VertShader =
-      shader.LoadShader("./Shaders/VertShader.vert", Shader::Type::Vertex);
+      shader.LoadShader("./Shaders/VertShader.vert", ShaderType::Vertex);
   uint FragShader =
-      shader.LoadShader("./Shaders/FragShader.frag", Shader::Type::Frag);
+      shader.LoadShader("./Shaders/FragShader.frag", ShaderType::Frag);
 
   shader.CompileShader();
 
@@ -107,7 +109,7 @@ int main() {
 
   // shader2.CompileShader({ VertShader, FragShader })
 
-  Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
+  Mesh prim = ModelLoader::LoadObj("./Objects/Sword/meshSwordShield.obj");
   prim.RecalculateNormals();
 
   prim.CalculateTangents();
@@ -132,8 +134,8 @@ int main() {
 
   uint texture;
   glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
   glActiveTexture(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texture);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -265,6 +267,9 @@ int main() {
         FlatShaded = true;
       }
     }
+
+    if(Keyboard.pressed['r'] && Keyboard.ctrlKey)
+      shader.Reload();
 
     if (Keyboard[KeyCode::ESCAPE]) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

@@ -8,7 +8,33 @@
 using string = std::string;
 using uint = unsigned int;
 
+
+enum class ShaderType: int {
+	Vertex = GL_VERTEX_SHADER,
+	Frag = GL_FRAGMENT_SHADER
+};
+
 class Shader{
+	class src{
+		public:
+		uint id;
+		const char* file;
+		ShaderType type;
+
+		src(const char* path, ShaderType type): file(path), type(type){
+			auto data = File::ReadText(path);
+			id = CompileSource(data, (int)type);
+		}
+
+		void Recompile(){
+			id = CompileSource(File::ReadText(file), (int)type);
+		}
+	};
+
+	static Array<src> Sources;
+
+	Array<uint> sourceIDs;
+	Array<uint> compiledIDs;
 
 	static uint CompileSource(string data, GLint flag) {
 		const char* dataSrc = data.c_str();
@@ -65,12 +91,6 @@ class Shader{
 	}
 
 public:
-	enum class Type {
-		Vertex = GL_VERTEX_SHADER,
-		Frag = GL_FRAGMENT_SHADER
-	};
-
-	Array<uint> ShaderIDs;
 
 	uint ProgrammID;
 
@@ -88,21 +108,24 @@ public:
 		glDeleteProgram(ProgrammID);
 	}
 
-	uint LoadShader(const char* filename, Type ShaderType){
-		string source = File::ReadText(filename);
-		uint id = CompileSource(source, (GLint)ShaderType);
-		ShaderIDs.push(id);
-		return id;
+	uint LoadShader(const char* filename, ShaderType shaderType){
+		uint index = Sources.length;
+		Sources.push(src(filename, shaderType));
+		sourceIDs.push(index);
+		return index;
 	}
 	
 	uint AddShader(uint id){
-		ShaderIDs.push(id);
+		sourceIDs.push(id);
 	}
 
 	uint CompileShader(){
-		for (uint& id : ShaderIDs) {
-			glAttachShader(ProgrammID, id);
+		for (uint& id : sourceIDs) {
+			glAttachShader(ProgrammID, Sources[id].id);
 		}
+
+		compiledIDs = sourceIDs.map<uint>([](const uint& e){return Sources[e].id;});
+
 		glLinkProgram(ProgrammID);
 		AssertShaderErrors(ProgrammID);
 
@@ -110,16 +133,21 @@ public:
 	}
 
 	uint CompileShader(std::initializer_list<uint> ids){
-		for (uint& id : ShaderIDs) {
-			glAttachShader(ProgrammID, id);
+		for (uint& id : sourceIDs) {
+			glAttachShader(ProgrammID, Sources[id].id);
 		}
+
+		compiledIDs = sourceIDs.map<uint>([](const uint& e){return Sources[e].id;});
 
 		auto ptr = ids.begin();
 		while (ptr != ids.end()){
-			glAttachShader(ProgrammID, *ptr);
+			glAttachShader(ProgrammID, Sources[*ptr].id);
+			compiledIDs.push(Sources[*ptr].id);
 		}
 		glLinkProgram(ProgrammID);
 		AssertShaderErrors(ProgrammID);
+
+
 
 		return ProgrammID;
 	}
@@ -127,5 +155,20 @@ public:
 	operator uint(){
 		return ProgrammID;
 	}
+
+	void Reload(){
+		for(uint& id: compiledIDs){
+			glDetachShader(ProgrammID, id);
+		}
+		
+		for(uint& id : sourceIDs){
+			Sources[id].Recompile();
+			glAttachShader(ProgrammID, Sources[id].id);
+		}
+
+		glLinkProgram(ProgrammID);
+		AssertShaderErrors(ProgrammID);
+	}
 };
 
+Array<Shader::src> Shader::Sources = Array<Shader::src>();

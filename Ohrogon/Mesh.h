@@ -164,7 +164,7 @@ public:
 	void AllocateBuffer() {
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, (Vertices.length + (long)Normals.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (Vertices.length + (long)Normals.length + Tangents.length + BiTangents.length) * sizeof(Vector3) + (UVs.length * sizeof(Vector2)), 0, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
