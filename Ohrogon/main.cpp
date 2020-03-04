@@ -99,7 +99,7 @@ int main() {
   uint VertShader =
       shader.LoadShader("./Shaders/VertShader.vert", Shader::Type::Vertex);
   uint FragShader =
-      shader.LoadShader("./Shaders/AltFragShader.frag", Shader::Type::Frag);
+      shader.LoadShader("./Shaders/FragShader.frag", Shader::Type::Frag);
 
   shader.CompileShader();
 
@@ -108,7 +108,7 @@ int main() {
   // shader2.CompileShader({ VertShader, FragShader })
 
   Mesh prim = ModelLoader::LoadObj("./Meshes/Orb.obj");
-  //prim.RecalculateNormals();
+  prim.RecalculateNormals();
 
   prim.CalculateTangents();
 
@@ -283,9 +283,11 @@ int main() {
 
     // cylinder.draw(MVPMatrixUniform, pv_M);
 
+    //prim.transform.Rotation *= Quaternion::euler(0, f, 0);
+
     // m.Bind();
-    // float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
-    // m.Ka = HSLtoRGB(Time, .2f, .2f);
+    float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
+    m.Ka = HSLtoRGB(Time, .2f, .2f);
 
     m.Bind();
     glBindTexture(GL_TEXTURE_2D, texture);

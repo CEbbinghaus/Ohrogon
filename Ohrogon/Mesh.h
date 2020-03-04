@@ -386,12 +386,18 @@ public:
 		Array<Vector3> TangentBuffer;
 		Array<Vector3> BiTangentBuffer;
 
-		for(int i = 0; i < Indices.length - 3; i += 3){
-			Vector3 PositionDelta1 = Vertices[i + 1] - Vertices[i];
-			Vector3 PositionDelta2 = Vertices[i + 2] - Vertices[i];
+		for(int i = 0; i < Indices.length; i += 3){
+			uint index1 = Indices[i];
+			uint index2 = Indices[i + 1];
+			uint index3 = Indices[i + 2];
 
-			Vector2 UVDelta1 = UVs[i + 1] - UVs[i];
-			Vector2 UVDelta2 = UVs[i + 2] - UVs[i];
+			Vector3 FaceNormal = Vector3::FaceNormal(Vertices[index1], Vertices[index2], Vertices[index3]);
+
+			Vector3 PositionDelta1 = Vertices[index2] - Vertices[index1];
+			Vector3 PositionDelta2 = Vertices[index3] - Vertices[index1];
+
+			Vector2 UVDelta1 = UVs[index2] - UVs[index1];
+			Vector2 UVDelta2 = UVs[index3] - UVs[index1];
 
 			float r = 1.0f / (UVDelta1.x * UVDelta2.y - UVDelta1.y * UVDelta2.x);
 			
@@ -401,6 +407,15 @@ public:
 			TangentBuffer.push({Tangent, Tangent, Tangent});
 			BiTangentBuffer.push({BiTangent, BiTangent, BiTangent});
 		}
+
+		// for (int i = 0; i < Vertices.length; i++)
+		// {
+		// 	Vector3& t = TangentBuffer[i];
+		// 	Vector3& b = BiTangentBuffer[i];
+		// 	Vector3& n = Normals[i];
+		// 	TangentBuffer[i] = ((t - n) * Vector3::dot(t, n));
+		// 	//Tangents[i].w = (Vector3::dot(Vector3::cross(t, b), n) > 0.0f) ? 1.0f : −1.0f;
+		// }
 
 		SetTangents(TangentBuffer);
 		SetBiTangents(BiTangentBuffer);
