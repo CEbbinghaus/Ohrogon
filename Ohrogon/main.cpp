@@ -109,7 +109,7 @@ int main() {
 
   // shader2.CompileShader({ VertShader, FragShader })
 
-  Mesh prim = ModelLoader::LoadObj("./Objects/Sword/meshSwordShield.obj");
+  Mesh prim = ModelLoader::LoadObj("./Objects/Orb/Orb.obj");
   prim.RecalculateNormals();
 
   prim.CalculateTangents();
@@ -126,29 +126,52 @@ int main() {
   // Mesh plane = Primitive::Plane(1);
   // Mesh cylinder = Primitive::Cylinder(20);
   // Mesh prim = Primitive::Cube();
-  int width, height, nrChannels;
-  unsigned char *imageData =
-      stbi_load("./Textures/Texture.png", &width, &height, &nrChannels, 0);
+  uint texture, texture1;
+  {
+    int width, height, nrChannels;
+    unsigned char *imageData =
+        stbi_load("./Objects/Orb/Diffuse.png", &width, &height, &nrChannels, 0);
 
-  if (!imageData) throw "Couldnt Find Image";
+    if (!imageData) throw "Couldnt Find Image";
 
-  uint texture;
-  glGenTextures(1, &texture);
-  glActiveTexture(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture);
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
-  glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels,
-               GL_UNSIGNED_BYTE, imageData);
-  glGenerateMipmap(GL_TEXTURE_2D);
+    int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
+    glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels,
+                GL_UNSIGNED_BYTE, imageData);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
-  stbi_image_free(imageData);
+    stbi_image_free(imageData);
+  }
+  {
+    int width, height, nrChannels;
+    unsigned char *imageData =
+        stbi_load("./Objects/Orb/Normal.png", &width, &height, &nrChannels, 0);
 
+    if (!imageData) throw "Couldnt Find Image";
+
+    glGenTextures(1, &texture1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
+    glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels, GL_UNSIGNED_BYTE, imageData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(imageData);
+  }
 
   Material m = Material(shader.ProgrammID);
 
@@ -166,6 +189,13 @@ int main() {
   auto CameraPosition =
       glGetUniformLocation(shader.ProgrammID, "cameraPosition");
   // auto TextureUniform = glGetUniformLocation(shader.ProgrammID, "Texture");
+
+  uint diffuseUniform = glGetUniformLocation(shader.ProgrammID, "DiffuseTexture");
+  uint normalUniform  = glGetUniformLocation(shader.ProgrammID, "NormalTexture");
+
+  // Then bind the uniform samplers to texture units:
+  glUniform1i(diffuseUniform, 0);
+  glUniform1i(normalUniform,  1);
 
   Camera cam;
 
@@ -288,16 +318,20 @@ int main() {
 
     // cylinder.draw(MVPMatrixUniform, pv_M);
 
-    //prim.transform.Rotation *= Quaternion::euler(0, f, 0);
+    prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime / Math::PI(), 0);
 
     // m.Bind();
-    float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
-    m.Ka = HSLtoRGB(Time, .2f, .2f);
+    //float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
+    //m.Ka = HSLtoRGB(Time, .2f, .2f);
 
     m.Bind();
-    glBindTexture(GL_TEXTURE_2D, texture);
-    prim.draw(MVPMatrixUniform, pv_M);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    prim.draw(MVPMatrixUniform, pv_M);
     glfwSwapBuffers(window);
 
     MouseCallbackHelper::Callback(window);
