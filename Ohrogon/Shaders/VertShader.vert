@@ -22,6 +22,6 @@ void main(){
 	color = vec3(1);
 	TexCoord = VertUV;
 	position = (ModelMatrix * vec4(VertPos,1)).xyz;
-	Tangent = VertTangent;
-	BiTangent = VertBiTangent;
+	Tangent = normalize(VertTangent);
+	BiTangent = normalize(VertBiTangent);
 }

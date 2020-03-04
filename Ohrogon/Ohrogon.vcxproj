@@ -172,7 +172,6 @@
     <ClCompile Include="Dependencies\glcore\gl_core_4_5.c" />
     <ClCompile Include="KeyManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MouseManager.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Window.cpp" />

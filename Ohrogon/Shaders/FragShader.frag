@@ -51,8 +51,8 @@ void main(){
   float specularTerm = pow( max( 0, dot( R, V ) ), specularPower );
   // calculate each colour property
   vec3 ambient = Ia * Ka;
-  vec3 diffuse = Id * Kd  * lambertTerm;
+  vec3 diffuse = Id * Kd  * lambertTerm * texCol.xyz;
   vec3 specular = Is * Ks * specularTerm;
 
-  FragColor = texCol * vec4(ambient + diffuse + specular, 1);
+  FragColor = vec4(Tangent, 1);//vec4(ambient + diffuse + specular, 1);
 }

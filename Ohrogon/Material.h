@@ -19,7 +19,6 @@ struct MaterialProperties{
 class Material : public StructBuffer<MaterialProperties>{
 public:
     Material(uint programm): StructBuffer(programm, "Material"){
-
         Ka = Vector3::one() / 2;
         Kd = Vector3::one();
         Ks = Vector3::one();
