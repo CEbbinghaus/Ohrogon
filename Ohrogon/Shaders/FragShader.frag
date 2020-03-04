@@ -7,6 +7,8 @@ in vec3 color;
 in vec3 Tangent;
 in vec3 BiTangent;
 
+in mat3 TBN;
+
 uniform int LightCount;
 uniform Light{
   vec3 position;
@@ -32,15 +34,19 @@ uniform Material{
 //uniform PhongMaterial Material;
 uniform vec3 cameraPosition;
 
-uniform sampler2D Texture;
+uniform sampler2D DiffuseTexture;
+uniform sampler2D NormalTexture;
 
 out vec4 FragColor;
 
 void main(){
-  vec4 texCol = texture(Texture, TexCoord );
+  vec4 texCol = texture(DiffuseTexture, TexCoord);
+  vec4 normCol = texture(NormalTexture, TexCoord);
     
+  vec3 normalDir = normalize(TBN * (vec3(normCol) * 2 - 1));
+
   //ensure normal and light direction are normalised
-  vec3 N = normalize(normal);
+  vec3 N = normalDir;
   vec3 L = normalize(LightDirection);
   // calculate lambert term (negate light direction)
   float lambertTerm = max( 0, dot( N, -L ) );
@@ -54,5 +60,5 @@ void main(){
   vec3 diffuse = Id * Kd  * lambertTerm * texCol.xyz;
   vec3 specular = Is * Ks * specularTerm;
 
-  FragColor = vec4(normal, 1);//vec4(ambient + diffuse + specular, 1);
+  FragColor = vec4(ambient + diffuse + specular, 1);
 }

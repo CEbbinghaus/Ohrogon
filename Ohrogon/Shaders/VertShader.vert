@@ -16,6 +16,8 @@ out vec3 position;
 out vec3 Tangent;
 out vec3 BiTangent;
 
+out mat3 TBN;
+
 void main(){
 	gl_Position = MVPMatrix * vec4(VertPos, 1);
 	normal = normalize((ModelMatrix * vec4(VertNormal, 0)).xyz);
@@ -25,4 +27,6 @@ void main(){
 
 	Tangent = normalize(VertTangent);
 	BiTangent = normalize(VertBiTangent);
+
+	TBN = mat3(Tangent, BiTangent, normal);
 }
