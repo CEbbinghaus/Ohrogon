@@ -160,11 +160,14 @@ public:
 		for(uint& id: compiledIDs){
 			glDetachShader(ProgrammID, id);
 		}
-		
+
 		for(uint& id : sourceIDs){
 			Sources[id].Recompile();
 			glAttachShader(ProgrammID, Sources[id].id);
 		}
+
+		compiledIDs = sourceIDs.map<uint>([](const uint& e){return Sources[e].id;});
+
 
 		glLinkProgram(ProgrammID);
 		AssertShaderErrors(ProgrammID);

@@ -54,5 +54,5 @@ void main(){
   vec3 diffuse = Id * Kd  * lambertTerm * texCol.xyz;
   vec3 specular = Is * Ks * specularTerm;
 
-  FragColor = vec4(Tangent, 1);//vec4(ambient + diffuse + specular, 1);
+  FragColor = vec4(normal, 1);//vec4(ambient + diffuse + specular, 1);
 }
