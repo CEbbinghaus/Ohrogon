@@ -140,16 +140,18 @@ public:
 			length += UVs.length * sizeof(Vector2);
 		}
 
+		glDisableVertexAttribArray(3);
 		if(Tangents.length){
 			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
-			glEnableVertexAttribArray(2);
+			glEnableVertexAttribArray(3);
 
 			length += Tangents.length * sizeof(Vector3);
 		}
 
+		glDisableVertexAttribArray(4);
 		if(BiTangents.length){
 			glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
-			glEnableVertexAttribArray(2);
+			glEnableVertexAttribArray(4);
 
 			length += BiTangents.length * sizeof(Vector3);
 		}
@@ -387,22 +389,26 @@ public:
 		Array<Vector3> BiTangentBuffer;
 
 		for(int i = 0; i < Indices.length; i += 3){
-			uint index1 = Indices[i];
-			uint index2 = Indices[i + 1];
-			uint index3 = Indices[i + 2];
+			uint i0 = Indices[i];
+			uint i1 = Indices[i + 1];
+			uint i2 = Indices[i + 2];
 
-			Vector3 FaceNormal = Vector3::FaceNormal(Vertices[index1], Vertices[index2], Vertices[index3]);
+			//Vector3 FaceNormal = Vector3::FaceNormal(Vertices[i0], Vertices[i1], Vertices[i2]);
 
-			Vector3 PositionDelta1 = Vertices[index2] - Vertices[index1];
-			Vector3 PositionDelta2 = Vertices[index3] - Vertices[index1];
+			Vector3 deltaPos1 = Vertices[i1] - Vertices[i0];
+			Vector3 deltaPos2 = Vertices[i2] - Vertices[i0];
 
-			Vector2 UVDelta1 = UVs[index2] - UVs[index1];
-			Vector2 UVDelta2 = UVs[index3] - UVs[index1];
+			Vector2 deltaUV1 = UVs[i1] - UVs[i0];
+			Vector2 deltaUV2 = UVs[i2] - UVs[i0];
 
-			float r = 1.0f / (UVDelta1.x * UVDelta2.y - UVDelta1.y * UVDelta2.x);
+			// float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 			
-			Vector3 Tangent = (PositionDelta1 * UVDelta2.y - PositionDelta2 * UVDelta1.y) * r;
-			Vector3 BiTangent = (PositionDelta2 * UVDelta1.x - PositionDelta1 * UVDelta2.x) * r;
+			// Vector3 Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+			// Vector3 BiTangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+			float res = (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+			float r = 1.0f / res;
+        	Vector3 Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+        	Vector3 BiTangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
 			TangentBuffer.push({Tangent, Tangent, Tangent});
 			BiTangentBuffer.push({BiTangent, BiTangent, BiTangent});
