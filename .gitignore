@@ -5,7 +5,9 @@
 *.slo
 *.lo
 *.o
-*.obj
+
+__TMP/**/*.*
+Build/*.obj
 
 !**/Meshes/*
 
