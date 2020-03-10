@@ -98,7 +98,7 @@ protected:
      * Args:
      *      name - Name of Variable in Shader
      */
-    template <class ShaderType>
+    template <class ValueType>
     void Specify(const char *name)
     {
 
@@ -108,7 +108,7 @@ protected:
         uint index, offset;
         GetDataLocation(finalName.c_str(), index, offset);
 
-        uint byteCount = (uint)sizeof(ShaderType);
+        uint byteCount = (uint)sizeof(ValueType);
         variables.push({byteCount, finalName.c_str(), (void *)((char *)this + memoryCounter), index, offset});
         memoryCounter += byteCount;
     }
@@ -122,7 +122,7 @@ protected:
      *      name - Name of Variable in Shader
      *      location - location of the Variable
      */
-    template <class ShaderType>
+    template <class ValueType>
     void Specify(const char *name, const void *location)
     {
 
@@ -131,7 +131,7 @@ protected:
         uint index, offset;
         GetDataLocation(finalName.c_str(), index, offset);
 
-        uint byteCount = (uint)sizeof(ShaderType);
+        uint byteCount = (uint)sizeof(ValueType);
         variables.push({ byteCount, finalName.c_str(), location, index, offset });
 
         //Side Effect. Will Cause Issues if not Properly Used

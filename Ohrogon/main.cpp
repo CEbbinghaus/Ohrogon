@@ -24,6 +24,7 @@
 #include "Window.h"
 #include "test.h"
 #include "Color.h"
+#include "String.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -81,7 +82,6 @@ int main() {
 
   // Mouse Initialization
   MouseManager Mouse = MouseManager::CreateMouseManager(window);
-
   //{
   //	int x, y;
   //	int width, height;
@@ -173,7 +173,7 @@ int main() {
 
   Material m = Material(shader.ProgrammID);
 
-  DataBuffer d = DataBuffer(shader.ProgrammID);
+  DataBuffer LightArray = DataBuffer(shader.ProgrammID);
 
 
   bool Wireframe = false;
@@ -299,7 +299,7 @@ int main() {
       }
     }
 
-    if(Keyboard.pressed['r'] && Keyboard.ctrlKey)
+    if(Keyboard.pressed[KeyCode::F5])
       shader.Reload();
 
     if (Keyboard[KeyCode::ESCAPE]) {
@@ -322,11 +322,13 @@ int main() {
     prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime /  Math::PI(), 0);
 
     // m.Bind();
-    //float Time = fmodf(Time::TotalTime * 100.0, 360.0f) / 360.0f;
     //m.Ka = HSLtoRGB(Time, .2f, .2f);
-   // d.color = HSLtoRGB(Time, .2f, .2f);
+
+    float Time = fmodf(Time::TotalTime * 100.0, 360.0f) / 360.0f;
+    LightArray[0].color = HSLtoRGB(Time, .2f, .2f);
+    LightArray.Bind();
+
     m.Bind();
-    d.Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

@@ -9,12 +9,13 @@ in vec3 BiTangent;
 
 in mat3 TBN;
 
-//uniform int LightCount;
-uniform LightBlock{
-  vec3 position;
+uniform PointLight{
   vec3 color;
   float intensity;
-} Lights[3];
+  vec3 position;
+  float radius;
+} PointLights[8];
+uniform int PointLightCount;
 
 uniform Material{
     vec3 Ka; // ambient material colour
@@ -61,5 +62,10 @@ void main(){
   vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
   vec3 specular = mat.Is * mat.Ks * specularTerm;
 
-  FragColor = vec4(Lights[0].color, 1);//vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1)
+  vec3 finalColor = vec3(0);
+  for(int i = 0; i < PointLightCount; ++i){
+    finalColor += PointLights[i].color;
+  }
+
+  FragColor = vec4(finalColor, 1);//vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1)
 }
