@@ -9,11 +9,12 @@ in vec3 BiTangent;
 
 in mat3 TBN;
 
-uniform int LightCount;
-uniform Light{
+//uniform int LightCount;
+uniform LightBlock{
   vec3 position;
+  vec3 color;
   float intensity;
-} Lights[];
+} Lights[3];
 
 uniform Material{
     vec3 Ka; // ambient material colour
@@ -24,7 +25,7 @@ uniform Material{
     vec3 Is; // specular light colour
     vec3 LightDirection;
     float specularPower; // material specular power
-};
+} mat;
 
 // uniform ColorBlock {
 //     vec4 diffuse;
@@ -47,18 +48,18 @@ void main(){
 
   //ensure normal and light direction are normalised
   vec3 N = normalDir;
-  vec3 L = normalize(LightDirection);
+  vec3 L = normalize(mat.LightDirection);
   // calculate lambert term (negate light direction)
   float lambertTerm = max( 0, dot( N, -L ) );
   // calculate view vector and reflection vector
   vec3 V = normalize(cameraPosition - position);
   vec3 R = reflect( L, N );
   // calculate specular term
-  float specularTerm = pow( max( 0, dot( R, V ) ), specularPower );
+  float specularTerm = pow( max( 0, dot( R, V ) ), mat.specularPower );
   // calculate each colour property
-  vec3 ambient = Ia * Ka;
-  vec3 diffuse = Id * Kd  * lambertTerm * texCol.xyz;
-  vec3 specular = Is * Ks * specularTerm;
+  vec3 ambient = mat.Ia * mat.Ka;
+  vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
+  vec3 specular = mat.Is * mat.Ks * specularTerm;
 
-  FragColor = vec4(ambient + diffuse + specular, 1);
+  FragColor = vec4(Lights[0].color, 1);//vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1)
 }

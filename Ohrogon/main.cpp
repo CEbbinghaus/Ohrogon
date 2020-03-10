@@ -68,8 +68,6 @@ int main() {
 
   stbi_set_flip_vertically_on_load(true);
 
-  printf("Floor of Inifinity: %f\n", -INFINITY - floorf(-INFINITY));
-
   // turn VSync off
   // glfwSwapInterval(0);
 
@@ -174,6 +172,9 @@ int main() {
   }
 
   Material m = Material(shader.ProgrammID);
+
+  DataBuffer d = DataBuffer(shader.ProgrammID);
+
 
   bool Wireframe = false;
 
@@ -318,13 +319,14 @@ int main() {
 
     // cylinder.draw(MVPMatrixUniform, pv_M);
 
-    prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime / Math::PI(), 0);
+    prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime /  Math::PI(), 0);
 
     // m.Bind();
-    //float Time = fmodf(Time::TotalTime * 10.0, 360.0f) / 360.0f;
+    //float Time = fmodf(Time::TotalTime * 100.0, 360.0f) / 360.0f;
     //m.Ka = HSLtoRGB(Time, .2f, .2f);
-
+   // d.color = HSLtoRGB(Time, .2f, .2f);
     m.Bind();
+    d.Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
