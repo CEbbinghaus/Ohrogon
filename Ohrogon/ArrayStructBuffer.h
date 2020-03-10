@@ -1,284 +1,153 @@
 #pragma once;
 
-#include <gl_core_4_5.h>
 #include <atyp_Array.h>
-#include <vector>
+#include <gl_core_4_5.h>
+
+#include "String.h"
 
 using uint = unsigned int;
 
-struct test{
-    int index;
-    float f;
-};
-
-template <
-    typename T,
-    class = typename std::enable_if_t<std::is_class_v<T>, T>>
-class ArrayStructBuffer
-{
-
-private:
-    class SubBuffer;
-
-    Array<SubBuffer> BufferArray;
-    struct Variable{
+template <typename T>
+class ArrayStructBuffer {
+   private:
+    struct Variable {
         uint size;
-        const char *name;
-        const void *location;
         uint index;
         uint offset;
+        const char* name;
+        uint location;
     };
-    
     Array<Variable> variables;
-    uint memoryCounter = 0;
+    uint memoryOffset;
 
-    static uint HighestBindIndex;
-
-    const char *name;
     uint ProgramID;
+    const char* name;
+    const char* lengthName;
+    uint lengthLocation;
     int dataSize;
+    uint maxLength;
 
-    class SubBuffer : public T{
-        const ArrayStructBuffer& parent;
-    public:
+    class StructContainer : public T {
+        ArrayStructBuffer* parent;
+
+       public:
         uint index;
         uint blockIndex;
         uint buffer;
-        void* data;
+        void* data = nullptr;
 
-        SubBuffer(const ArrayStructBuffer* p, const T& object): parent(*p){
-            memcpy(this, &object, sizeof(T));
-            index = parent.BufferArray.length;
-            std::string location = std::string(parent.name) + "[" + std::to_string(index) + "]";
-            blockIndex = glGetUniformBlockIndex(parent.ProgramID, location.c_str());
-        }
+        StructContainer(ArrayStructBuffer* p) : parent(p) {}
 
-        ~SubBuffer(){
-            if(data != nullptr)
+        StructContainer(const StructContainer& v) : parent(v.parent) {
+            parent = v.parent;
+            if (data != nullptr)
                 free(data);
+            data = malloc(parent->dataSize);
+            memcpy(data, v.data, parent->dataSize);
+            //Initialize(v.index);
         }
 
-         SubBuffer(const SubBuffer& other){
-             memcpy(this, &other, sizeof(SubBuffer));
-             data = malloc(dataSize);
-             memcpy(data, other.data, dataSize);
-         }
+        StructContainer(StructContainer&& v) noexcept {
+            parent = v.parent;
+            data = v.data;
+            v.data = nullptr;
+            //Initialize(v.index);
+        }
 
-         SubBuffer(const SubBuffer&& other){
-             memcpy(this, &other, sizeof(SubBuffer));
-             other->data = nullptr;
-         }
+        void operator=(const StructContainer& v) {
+            parent = v.parent;
+            if (data != nullptr) free(data);
+            data = malloc(parent->dataSize);
+            if (v.data != nullptr)
+                memcpy(data, v.data, parent->dataSize);
+            //Initialize(v.index);
+        }
 
-         void operator =(const SubBuffer& other){
-             memcpy(this, &other, sizeof(SubBuffer));
-             data = malloc(dataSize);
-             memcpy(data, other.data, dataSize);
-         }
+        void operator=(StructContainer&& v) noexcept {
+            parent = v.parent;
+            data = v.data;
+            v.data = nullptr;
+            Initialize(v.index);
+        }
 
-         void operator =(const SubBuffer&& other){
-             memcpy(this, &other, sizeof(SubBuffer));
-             other->data = nullptr;
-         }
+        void Initialize(uint index) {
+            this->index = index;
 
-        void Initialize(){
-            glUniformBlockBinding(parent.ProgramID, blockIndex, index);
+            String location = String::format("%s[%i]", parent->name, index);
+
+            blockIndex = glGetUniformBlockIndex(parent->ProgramID, location);
+
+            glUniformBlockBinding(parent->ProgramID, blockIndex, index);
 
             glGenBuffers(1, &buffer);
 
-            data = malloc(dataSize);
+            data = malloc(parent->dataSize);
         }
 
-        void Bind(){
-            glUniformBlockBinding(parent.ProgramID, blockIndex, index);
+        ~StructContainer() {
+            if (data != nullptr)
+                free(data);
+        }
 
-            for(int i = 0; i < parent.variables.length; ++i){
-                auto& v = parent.variables[i];
-                memcpy((char*)data + v.offset, (char*)this + v.location, v.size);
+        void Bind() {
+            glUniformBlockBinding(parent->ProgramID, blockIndex, index);
+
+            for (int i = 0; i < parent->variables.length; ++i) {
+                auto& v = parent->variables[i];
+                memcpy((char*)data + (int)v.offset, (char*)this + v.location, v.size);
             }
 
-
             glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-            glBufferData(GL_UNIFORM_BUFFER, parent.dataSize, data, GL_STATIC_DRAW);
-            glBindBufferRange(GL_UNIFORM_BUFFER, index, buffer, 0, parent.dataSize);
+            glBufferData(GL_UNIFORM_BUFFER, parent->dataSize, data, GL_STATIC_DRAW);
+            glBindBufferRange(GL_UNIFORM_BUFFER, index, buffer, 0, parent->dataSize);
         }
     };
+    Array<StructContainer> structs;
 
-    void AllocateData()
-    {
-        glGetActiveUniformBlockiv(ProgramID, glGetUniformBlockIndex(ProgramID, name), GL_UNIFORM_BLOCK_DATA_SIZE, &dataSize);
+    void InitializeSize() {
+        uint index = glGetUniformBlockIndex(ProgramID, name);
+        lengthLocation = glGetUniformLocation(ProgramID, lengthName);
+
+        glGetActiveUniformBlockiv(ProgramID, index, GL_UNIFORM_BLOCK_DATA_SIZE, &dataSize);
     }
 
-    void GetDataLocation(const char* name, uint& index, uint& offset){
+    void GetDataLocation(const char* name, uint& index, uint& offset) {
         glGetUniformIndices(ProgramID, 1, (const GLchar* const*)&name, (GLuint*)&index);
 
-        glGetActiveUniformsiv(ProgramID, 1, (GLuint*)&index,
-                                  GL_UNIFORM_OFFSET, (GLint*)&offset);
+        glGetActiveUniformsiv(ProgramID, 1, (GLuint*)&index, GL_UNIFORM_OFFSET, (GLint*)&offset);
 
-        if(index == -1 || offset == -1)
+        if (index == -1 || offset == -1)
             throw "Could Not Run Stuff";
 
         return;
     }
 
-protected:
-    ArrayStructBuffer(uint ShaderProgram, const char *name) : name(name)
-    {
-        glGetError();
+   protected:
+    uint length;
 
-        ProgramID = ShaderProgram;
-
-        AllocateData();
-    }
-
-    /* Specify<T>(const char* name)
-     *  
-     * template:
-     *      T = The Type of the Variable 
-     * Args:
-     *      name - Name of Variable in Shader
-     */
-    template <class ShaderType>
-    void Specify(const char *name)
-    {
-
-        std::string finalName = (std::string(this->name) + ".") + name;
-        
-
-        uint index, offset;
-        GetDataLocation(finalName.c_str(), index, offset);
-
-        uint byteCount = (uint)sizeof(ShaderType);
-        variables.push({byteCount, finalName.c_str(), (void *)((char *)this + memoryCounter), index, offset});
-        memoryCounter += byteCount;
-    }
-
-public:
-
-    void Bind(){
-        for(int i = 0; i < BufferArray.length; ++i){
-            BufferArray[i].Bind();
-          // b.Bind();
+    ArrayStructBuffer(uint Programid, const char* name, const char* lengthName, uint maxLength) : ProgramID(Programid), name(name), lengthName(lengthName) {
+        InitializeSize();
+        this->maxLength = maxLength;
+        length = 0;
+        structs = Array<StructContainer>(maxLength).fill(StructContainer(this));
+        for (int i = 0; i < maxLength; ++i) {
+            structs[i].Initialize(i);
         }
+        //structs.push(StructContainer(this));
     }
 
-    void add(const T& data){
-        SubBuffer tmp(this, data);
-        BufferArray.push(tmp);
-    }
-
-    T& operator[](int index){
-        if(index >= BufferArray.size())throw "Out of Bounds";
-        Array<SubBuffer>& arr = (*((Array<SubBuffer>*)this));
-        return *((T*)&arr[index]);
-    }
-};
-
-template <typename T, class V>
-uint ArrayStructBuffer<T, V>::HighestBindIndex = 1;
-
-/*
-private:
-    struct Variable
-    {
-        uint size;
-        const char *name;
-        const void *location;
-        uint index;
-        uint offset;
-    };
-
-    static uint HighestBindIndex;
-    uint memoryCounter = 0;
-
-    const char *name;
-    bool isInstanced;
-    uint ProgramID;
-
-    int bindIndex = 1;
-    uint blockIndex;
-    int dataSize;
-    uint buffer;
-
-    void* data;
-
-    std::vector<Variable> variables;
-
-    void AllocateData()
-    {
-        std::string location = std::string(name) + "[1]";
-        blockIndex = glGetUniformBlockIndex(ProgramID, location.c_str());
-        bindIndex = HighestBindIndex++;
-
-        glGetActiveUniformBlockiv(ProgramID, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &dataSize);
-
-        glUniformBlockBinding(ProgramID, blockIndex, bindIndex);
-        
-        // glGetActiveUniformBlockiv(ProgramID,
-        //     blockIndex,
-        //     GL_UNIFORM_BLOCK_BINDING,
-        //     &bindIndex);
-
-        glGenBuffers(1, &buffer);
-
-        data = malloc(dataSize * 2);
-    }
-
-    void GetDataLocation(const char* name, uint& index, uint& offset){
-        glGetUniformIndices(ProgramID, 1, (const GLchar* const *)&name, (GLuint*)&index);
-
-        glGetActiveUniformsiv(ProgramID, 1, (GLuint*)&index,
-                                  GL_UNIFORM_OFFSET, (GLint*)&offset);
-
-        if(index == -1 || offset == -1)
-            throw "Could Not Run Stuff";
-
-        return;
-    }
-
-protected:
-    ArrayStructBuffer(uint ShaderProgram, const char *name, bool instanced = false) : name(name)
-    {
-        glGetError();
-
-        ProgramID = ShaderProgram;
-        isInstanced  = instanced;
-
-        AllocateData();
-    }
-
-    ArrayStructBuffer(const ArrayStructBuffer &original)
-    {
-        memcpy((T *)this, (T *)&original, sizeof(T));
-        name = original.name;
-        ProgramID = original.ProgramID;
-        isInstanced = original.isInstanced;
-        AllocateData();
-    }
-
-    ~ArrayStructBuffer(){
-        free(data);
-    }
-
-    /* Specify<T>(const char* name)
-     *  
-     * template:
-     *      T = The Type of the Variable 
-     * Args:
-     *      name - Name of Variable in Shader
-     
-    template <class ShaderType>
-    void Specify(const char *name)
-    {
-
-        std::string finalName = isInstanced ? std::string(this->name) + std::string(".") + std::string(name) : std::string(name);
-        
+    template <typename ValueType>
+    void Specify(const char* varName) {
+        String finalName = String::format("%s.%s", name, varName);
 
         uint index, offset;
-        GetDataLocation(finalName.c_str(), index, offset);
+        GetDataLocation(finalName, index, offset);
 
-        uint byteCount = (uint)sizeof(ShaderType);
-        variables.push({byteCount, finalName.c_str(), (void *)((char *)this + memoryCounter), index, offset});
-        memoryCounter += byteCount;
+        uint size = sizeof(ValueType);
+
+        variables.push({size, index, offset, finalName, memoryOffset});
+
+        memoryOffset += size;
     }
 
     /* Specify<T>(const char* name, void* location)
@@ -289,40 +158,35 @@ protected:
      * Args:
      *      name - Name of Variable in Shader
      *      location - location of the Variable
+     */
     template <class ShaderType>
-    void Specify(const char *name, const void *location)
-    {
-
-        std::string finalName = isInstanced ? std::string(this->name) + std::string(".") + std::string(name) : std::string(name);
+    void Specify(const char* variableName, const void* location) {
+        String finalName = String::format("%s.%s", name, variableName);
 
         uint index, offset;
-        GetDataLocation(finalName.c_str(), index, offset);
+        GetDataLocation(finalName, index, offset);
 
-        uint byteCount = (uint)sizeof(ShaderType);
-        variables.push({ byteCount, finalName.c_str(), location, index, offset });
+        memoryOffset = (uint)(this - location);
+
+        uint size = (uint)sizeof(ShaderType);
+        variables.push({size, index, offset, finalName, memoryOffset});
 
         //Side Effect. Will Cause Issues if not Properly Used
-        memoryCounter = offset;
     }
 
-public:
-    void Bind()
-    {
-
-        glUniformBlockBinding(ProgramID, blockIndex, bindIndex);
-
-        for (int i = 0; i < variables.length; ++i)
-        {
-            auto& v = variables[i];
-            memcpy((char*)data + v.offset, v.location, v.size);
-            memcpy(((char*)data + dataSize) + v.offset, v.location, v.size);
-
-            //printf("Index: %i Offset: %i\n", v.index, v.offset);
+   public:
+    void Bind() {
+        glUniform1i(lengthLocation, length);
+        for(int i = 0; i < length; ++i){
+            structs[i].Bind();
         }
-
-
-        glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-        glBufferData(GL_UNIFORM_BUFFER, dataSize * 2, data, GL_STATIC_DRAW);
-        glBindBufferRange(GL_UNIFORM_BUFFER, bindIndex, buffer, 0, dataSize * 2);
+        // for (StructContainer& s : structs) {
+        //     s.Bind();
+        // }
     }
-*/
+
+    T& operator[](unsigned int index) {
+        if (index >= maxLength) throw "Out of Bounds Index";
+        return (T&)structs[index];
+    }
+};
