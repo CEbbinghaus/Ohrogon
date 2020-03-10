@@ -1,19 +1,25 @@
 #include <atyp_Vectors.h>
-#include "StructBuffer.h"
+#include "ArrayStructBuffer.h"
 
-struct data {
-  Vector3 a;
-  Vector3 b;
+struct BufferData {
+  Vector3 position;
+  Vector3 color;
+  float intensity;
 };
 
-class DataBuffer: public StructBuffer<data>{
+class DataBuffer: public ArrayStructBuffer<BufferData>{
     public:
-    DataBuffer(uint ProgramID): StructBuffer(ProgramID, "ColorBlock"){
-        a = Vector3(.0f, .5f, 1.0f);
-        b = Vector3(1.0f, 1.0f, 1.0f);
+    DataBuffer(uint ProgramID): ArrayStructBuffer(ProgramID, "LightBlock"){
 
-        Specify<Vector3>("diffuse");
-        Specify<Vector3>("ambient");
+        add({ Vector3(.0f, 2.0f, .0f), Vector3(.0f, .5f, 1.0f), 1.0f });
+   /*     (*this)[0].position = Vector3(.0f, 2.0f, .0f);
+        (*this)[0].color = Vector3(.0f, .5f, 1.0f);
+        (*this)[0].intensity = 1.0f;*/
+        //(*this)[0].color;
+
+        Specify<Vector3>("position");
+        Specify<Vector3>("color");
+        Specify<float>("intensity");
         Bind();
     }
 };

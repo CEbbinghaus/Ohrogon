@@ -61,7 +61,6 @@ public:
 	}
 
 	Mesh(const Mesh& original) {
-		printf("Copy Constructor Called");
 		GenerateBuffers();
 		SetVertices(original.Vertices);
 		SetIndices(original.Indices);

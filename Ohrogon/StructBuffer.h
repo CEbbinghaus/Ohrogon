@@ -24,6 +24,7 @@ private:
     uint memoryCounter = 0;
 
     const char *name;
+    bool isInstanced;
     uint ProgramID;
 
     int bindIndex = 1;
@@ -59,15 +60,20 @@ private:
 
         glGetActiveUniformsiv(ProgramID, 1, (GLuint*)&index,
                                   GL_UNIFORM_OFFSET, (GLint*)&offset);
-                            
-    }
+
+        if(index == -1 || offset == -1)
+            throw "Could Not Run Stuff";
+
+        return;
+     }
 
 protected:
-    StructBuffer(uint ShaderProgramm, const char *name) : name(name)
+    StructBuffer(uint ShaderProgram, const char *name, bool instanced = false) : name(name)
     {
         glGetError();
 
-        ProgramID = ShaderProgramm;
+        ProgramID = ShaderProgram;
+        isInstanced  = instanced;
 
         AllocateData();
     }
@@ -77,7 +83,7 @@ protected:
         memcpy((T *)this, (T *)&original, sizeof(T));
         name = original.name;
         ProgramID = original.ProgramID;
-
+        isInstanced = original.isInstanced;
         AllocateData();
     }
 
@@ -95,11 +101,15 @@ protected:
     template <class ShaderType>
     void Specify(const char *name)
     {
+
+        std::string finalName = isInstanced ? std::string(this->name) + std::string(".") + std::string(name) : std::string(name);
+        
+
         uint index, offset;
-        GetDataLocation(name, index, offset);
+        GetDataLocation(finalName.c_str(), index, offset);
 
         uint byteCount = (uint)sizeof(ShaderType);
-        variables.push({byteCount, name, (void *)((char *)this + memoryCounter), index, offset});
+        variables.push({byteCount, finalName.c_str(), (void *)((char *)this + memoryCounter), index, offset});
         memoryCounter += byteCount;
     }
 
@@ -115,11 +125,14 @@ protected:
     template <class ShaderType>
     void Specify(const char *name, const void *location)
     {
+
+        std::string finalName = isInstanced ? std::string(this->name) + std::string(".") + std::string(name) : std::string(name);
+
         uint index, offset;
-        GetDataLocation(name, index, offset);
+        GetDataLocation(finalName.c_str(), index, offset);
 
         uint byteCount = (uint)sizeof(ShaderType);
-        variables.push({ byteCount, name, location, index, offset });
+        variables.push({ byteCount, finalName.c_str(), location, index, offset });
 
         //Side Effect. Will Cause Issues if not Properly Used
         memoryCounter = offset;
