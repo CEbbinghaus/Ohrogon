@@ -27,6 +27,7 @@ class Shader{
 		}
 
 		void Recompile(){
+			glDeleteShader(id);
 			id = CompileSource(File::ReadText(file), (int)type);
 		}
 	};

@@ -71,13 +71,15 @@ class ArrayStructBuffer {
         }
 
         void Initialize(uint index) {
+            glDeleteBuffers(1, &buffer);
+            
             this->index = index;
 
             String location = String::format("%s[%i]", parent->name, index);
 
             blockIndex = glGetUniformBlockIndex(parent->ProgramID, location);
 
-            glUniformBlockBinding(parent->ProgramID, blockIndex, index);
+            glUniformBlockBinding(parent->ProgramID, blockIndex, index + 200);
 
             glGenBuffers(1, &buffer);
 
@@ -85,12 +87,13 @@ class ArrayStructBuffer {
         }
 
         ~StructContainer() {
+            glDeleteBuffers(1, &buffer);
             if (data != nullptr)
                 free(data);
         }
 
         void Bind() {
-            glUniformBlockBinding(parent->ProgramID, blockIndex, index);
+            glUniformBlockBinding(parent->ProgramID, blockIndex, index + 200);
 
             for (int i = 0; i < parent->variables.length; ++i) {
                 auto& v = parent->variables[i];
