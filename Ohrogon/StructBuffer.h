@@ -88,7 +88,10 @@ protected:
     }
 
     ~StructBuffer(){
-        free(data);
+        glDeleteBuffers(1, &buffer);
+
+        if(data != nullptr)
+            free(data);
     }
 
     /* Specify<T>(const char* name)

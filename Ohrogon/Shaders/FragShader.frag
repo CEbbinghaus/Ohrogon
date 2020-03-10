@@ -67,5 +67,5 @@ void main(){
     finalColor += PointLights[i].color;
   }
 
-  FragColor = vec4(finalColor, 1);//vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1)
+  FragColor = vec4(PointLights[2].color, 1);//vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1)
 }
