@@ -25,6 +25,7 @@
 #include "test.h"
 #include "Color.h"
 #include "String.h"
+#include "DirectionLights.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -106,13 +107,16 @@ int main() {
   // Shader shader2 = Shader();
 
   // shader2.CompileShader({ VertShader, FragShader })
-
+  Mesh sphere = Primitive::Sphere(20, 20);
+  sphere.RecalculateNormals();
   Mesh prim = ModelLoader::LoadObj("./Objects/Orb/Orb.obj");
   prim.RecalculateNormals();
 
   prim.CalculateTangents();
 
   prim.transform.Scale = Vector3(5.0f);
+  sphere.transform.Scale = Vector3(5.0f);
+  sphere.transform.Position = Vector3(0.0f, 0.0f, 10.0f);
   // prim.RecalculateNormals();
 
   // prim.RecalculateNormals();
@@ -173,7 +177,13 @@ int main() {
 
   Material m = Material(shader.ProgrammID);
 
-  DataBuffer LightArray = DataBuffer(shader.ProgrammID);
+  DirectionLights lights = DirectionLights(shader, 4);
+  lights.length = 2;
+  lights[0].direction = -Vector3::up();
+  lights[1].direction = Vector3::right();
+  lights[1].color = Vector3(0.0f, 0.5f, 1.0f);
+
+  //DataBuffer LightArray = DataBuffer(shader.ProgrammID);
 
 
   bool Wireframe = false;
@@ -308,10 +318,10 @@ int main() {
 
     cam.transform.Position += movement * Time::OneTime;
 
-    Matrix4 ModelMatrix = prim.transform.updateTransform();
     Matrix4 pv_M = cam.getPVMatrix();
-    glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
-    glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
+    //Matrix4 ModelMatrix = prim.transform.updateTransform();
+    //glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
+    //glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
     glUniform3fv(CameraPosition, 1, (GLfloat*)&cam.transform.Position);
     // glUniform1i(TextureUniform, )
 
@@ -325,17 +335,28 @@ int main() {
     //m.Ka = HSLtoRGB(Time, .2f, .2f);
 
     float Time = fmodf(Time::TotalTime * 100.0, 360.0f) / 360.0f;
-    LightArray[0].color = HSLtoRGB(Time, .2f, .2f);
-    LightArray.Bind();
+    lights[0].color = HSLtoRGB(Time, .2f, .2f);
+    lights.Bind();
 
     m.Bind();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    {
 
-    prim.draw(MVPMatrixUniform, pv_M);
+      diffuseUniform = glGetUniformLocation(shader.ProgrammID, "DiffuseTexture");
+      normalUniform  = glGetUniformLocation(shader.ProgrammID, "NormalTexture");
+
+      // Then bind the uniform samplers to texture units:
+      glUniform1i(diffuseUniform, 0);
+      glUniform1i(normalUniform,  1);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, texture);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, texture1);
+    }
+
+    sphere.draw(MVPMatrixUniform, ModelMatrixUniform, pv_M);
+    prim.draw(MVPMatrixUniform, ModelMatrixUniform, pv_M);
+    
     glfwSwapBuffers(window);
 
     MouseCallbackHelper::Callback(window);

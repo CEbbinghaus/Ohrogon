@@ -167,6 +167,7 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
+	
 	void BindIndices() {
 		glBindVertexArray(VAO);
 
@@ -177,8 +178,17 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void BindVertices() {
+
+	void BindAllData(){
 		AllocateBuffer();
+		BindVertices();
+		BindNormals();
+		BindUVs();
+		BindTangents();
+		BindBiTangents();
+	}
+
+	void BindVertices() {
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, Vertices.length * sizeof(Vector3), Vertices.data());
@@ -186,7 +196,6 @@ public:
 	}
 
 	void BindNormals() {
-		BindVertices();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, Vertices.length * sizeof(Vector3), Normals.length * sizeof(Vector3), Normals.data());
@@ -194,7 +203,6 @@ public:
 	}
 
 	void BindUVs() {
-		BindNormals();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length) * sizeof(Vector3), UVs.length * sizeof(Vector2), UVs.data());
@@ -202,7 +210,6 @@ public:
 	}
 
 	void BindTangents(){
-		BindUVs();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length) * sizeof(Vector3) + (UVs.length) * sizeof(Vector2), Tangents.length * sizeof(Vector3), Tangents.data());
@@ -210,7 +217,6 @@ public:
 	}
 
 	void BindBiTangents(){
-		BindTangents();
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, (Vertices.length + Normals.length + Tangents.length) * sizeof(Vector3) + (UVs.length) * sizeof(Vector2), BiTangents.length * sizeof(Vector3), BiTangents.data());
@@ -218,16 +224,21 @@ public:
 	}
 
 	void SetIndices(Array<uint> indxs) {
-		glBindVertexArray(VAO);
+		
 		Indices = indxs;
+
+		glBindVertexArray(VAO);
 		BindIndices();
 		glBindVertexArray(0);
 	}
 
 	void SetVertices(Array<Vector3> verts) {
-		glBindVertexArray(VAO);
+
 		Vertices = verts;
-		BindVertices();
+
+		glBindVertexArray(VAO);
+		BindAllData();
+		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
 
@@ -237,7 +248,7 @@ public:
 		Normals = normals;
 
 		glBindVertexArray(VAO);
-		BindNormals();
+		BindAllData();
 		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
@@ -248,7 +259,7 @@ public:
 		UVs = uvs;
 
 		glBindVertexArray(VAO);
-		BindUVs();
+		BindAllData();
 		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
@@ -257,7 +268,7 @@ public:
 		Tangents = tangents;
 
 		glBindVertexArray(VAO);
-		BindTangents();
+		BindAllData();
 		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
@@ -266,7 +277,7 @@ public:
 		BiTangents = bitangents;
 
 		glBindVertexArray(VAO);
-		BindBiTangents();
+		BindAllData();
 		UpdateVertexAttributes();
 		glBindVertexArray(0);
 	}
@@ -306,7 +317,7 @@ public:
 
 		int i = 0;
 		for (uint& index : oldIndicies) {
-			Vector3 b = oldVerts[index];
+			Vector3 b = oldVerts[index]; 
 			int indx = newVerts.indexOf(b);
 			if (indx == -1) {
 				newVerts.push(b);
@@ -325,10 +336,13 @@ public:
 		RecalculateNormals();
 	}
 
-	void draw(uint MVPMatrixUniform, Matrix4 ProjectionView) {
-		glBindVertexArray(VAO);
+	void draw(uint MVPMatrixUniform, uint ModelMatrixUniform, Matrix4 ProjectionView) {		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+		Matrix4 ModelMatrix = transform.updateTransform();
+		glUniformMatrix4fv(MVPMatrixUniform, 1, false, ProjectionView * ModelMatrix);
+		glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
 
 		//glUniformMatrix4fv(MVPMatrixUniform, 1, false, ProjectionView * transform.updateTransform());
 		//glUniformMatrix4fv(ModelMatrixUniform, 1, false, t.localTransform);
@@ -342,6 +356,7 @@ public:
 
 		glDrawElements(GL_TRIANGLES, Indices.length, GL_UNSIGNED_INT, 0);
 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		glBindVertexArray(0);
 	}
@@ -379,6 +394,8 @@ public:
 		});
 
 		SetNormals(normals);
+		if(!UVs.isEmpty())
+			CalculateTangents();
 	}
 
 	void CalculateTangents(){
@@ -392,7 +409,7 @@ public:
 			uint i1 = Indices[i + 1];
 			uint i2 = Indices[i + 2];
 
-			//Vector3 FaceNormal = Vector3::FaceNormal(Vertices[i0], Vertices[i1], Vertices[i2]);
+			Vector3 FaceNormal = Vector3::FaceNormal(Vertices[i0], Vertices[i1], Vertices[i2]);
 
 			Vector3 deltaPos1 = Vertices[i1] - Vertices[i0];
 			Vector3 deltaPos2 = Vertices[i2] - Vertices[i0];
@@ -405,9 +422,19 @@ public:
 			// Vector3 Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
 			// Vector3 BiTangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 			float res = (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-			float r = 1.0f / res;
-        	Vector3 Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-        	Vector3 BiTangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+			Vector3 Tangent;
+			Vector3 BiTangent;
+			if(res != 0.0f){
+				float r = 1.0f / res;
+				Tangent = ((deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r);
+				BiTangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+			}else{
+				Tangent = Vector3(FaceNormal.y, -FaceNormal.x, FaceNormal.z);
+				BiTangent = Vector3::cross(Tangent, FaceNormal);
+			}
+
+			Tangent.normalise();
+			BiTangent.normalise();
 
 			TangentBuffer.push({Tangent, Tangent, Tangent});
 			BiTangentBuffer.push({BiTangent, BiTangent, BiTangent});

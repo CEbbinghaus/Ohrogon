@@ -17,6 +17,13 @@ uniform PointLight{
 } PointLights[8];
 uniform int PointLightCount;
 
+uniform DirectionLight{
+  vec3 color;
+  float intensity;
+  vec3 direction;
+} DirectionLights[4];
+uniform int DirectionLightCount;
+
 uniform Material{
     vec3 Ka; // ambient material colour
     vec3 Kd; // diffuse material colour
@@ -45,27 +52,51 @@ void main(){
   vec4 texCol = texture(DiffuseTexture, TexCoord);
   vec4 normCol = texture(NormalTexture, TexCoord);
     
-  vec3 normalDir = normalize(TBN * (vec3(normCol) * 2 - 1));
+  vec3 normalDir = normalize(TBN * ((normCol.xyz) * 2 - 1));
 
   //ensure normal and light direction are normalised
   vec3 N = normalDir;
-  vec3 L = normalize(mat.LightDirection);
-  // calculate lambert term (negate light direction)
-  float lambertTerm = max( 0, dot( N, -L ) );
-  // calculate view vector and reflection vector
-  vec3 V = normalize(cameraPosition - position);
-  vec3 R = reflect( L, N );
-  // calculate specular term
-  float specularTerm = pow( max( 0, dot( R, V ) ), mat.specularPower );
+
   // calculate each colour property
   vec3 ambient = mat.Ia * mat.Ka;
-  vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
-  vec3 specular = mat.Is * mat.Ks * specularTerm;
 
+  vec3 Specular = vec3(0);
+  vec3 Lighting = vec3(0);
+  for(int i = 0; i < DirectionLightCount; ++i){
+    vec3 L = normalize(DirectionLights[i].direction);
+    // calculate lambert term (negate light direction)
+    float lambertTerm = max( 0, dot( N, -L ) );
+    // calculate view vector and reflection vector
+    vec3 V = normalize(cameraPosition - position);
+    vec3 R = reflect( L, N ) * clamp(sign(dot(N, -L)), 0, 1);
+    // calculate specular term
+    Specular += pow( max(0, dot(R, V) ), mat.specularPower) * DirectionLights[i].color;
+    Lighting += lambertTerm * DirectionLights[i].color;
+  }
+
+  // {
+  //   vec3 L = normalize(DirectionLights[0].direction);
+  //   // calculate lambert term (negate light direction)
+  //   float lambertTerm = max( 0, dot( N, -L ) );
+  //   // calculate view vector and reflection vector
+  //   vec3 V = normalize(cameraPosition - position);
+  //   vec3 R = reflect( L, N ) * clamp(sign(dot(N, -L)), 0, 1);
+  //   // calculate specular term
+  //   Specular += pow( max(0, dot(R, V) ), mat.specularPower);
+  //   Lighting += lambertTerm * DirectionLights[0].color;
+
+  //   FragColor = vec4(vec3(lambertTerm), 1);
+  // }
+
+  // vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
+  // vec3 specular = mat.Is * mat.Ks * specularTerm;
+
+  FragColor = vec4((Lighting + ambient) * texCol.xyz + Specular, 1);// + 0.0001 * vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1);
+}
+
+/*
   vec3 finalColor = vec3(0);
   for(int i = 0; i < PointLightCount; ++i){
     finalColor += PointLights[i].color;
   }
-
-  FragColor = vec4(PointLights[2].color, 1);//vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1)
-}
+*/

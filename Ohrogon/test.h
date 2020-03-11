@@ -1,5 +1,5 @@
 #include <atyp_Vectors.h>
-#include "ArrayStructBuffer.h"
+#include "StructBuffer.h"
 
 // struct BaseLight{
 //   BaseLight base;
@@ -21,7 +21,7 @@ struct PointLight{
 
 class DataBuffer: public ArrayStructBuffer<PointLight>{
     public:
-    DataBuffer(uint ProgramID): ArrayStructBuffer(ProgramID, "PointLight", "PointLightCount", 4){
+    DataBuffer(uint ProgramID): ArrayStructBuffer(ProgramID, "PointLight", "PointLightCount", 8){
 
   //       add({ Vector3(.0f, 2.0f, .0f), Vector3(.0f, .5f, 1.0f), 1.0f });
   //  /*     (*this)[0].position = Vector3(.0f, 2.0f, .0f);
@@ -36,7 +36,7 @@ class DataBuffer: public ArrayStructBuffer<PointLight>{
 
         (*this)[1].color = Vector3(0.0f, 0.5f, 1.0f);
 
-        length = 2;
+        length = 6;
   //       Bind();
     }
 };
