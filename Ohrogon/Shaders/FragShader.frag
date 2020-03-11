@@ -48,51 +48,84 @@ uniform sampler2D NormalTexture;
 
 out vec4 FragColor;
 
+
+vec3 DirectionLightColor(vec3 NormalDirection){
+  vec3 DiffuseColor = vec3(0);
+  for(int i = 0; i < DirectionLightCount; ++i){
+
+    vec3 LightDirection = normalize(DirectionLights[i].direction);
+    
+    // calculate lambert term (negate light direction)
+    float lambertTerm = max( 0, dot( NormalDirection, -LightDirection));
+
+    // // calculate view vector and reflection vector
+    // vec3 ViewDirection = normalize(cameraPosition - position);
+
+    // vec3 Reflection = reflect(LightDirection, NormalDirection) * clamp(sign(dot(NormalDirection, -LightDirection)), 0, 1);
+    // // calculate specular term
+    // Specular += pow( max(0, dot(Reflection, ViewDirection) ), mat.specularPower) * DirectionLights[i].color;
+
+    DiffuseColor += lambertTerm * (DirectionLights[i].color * DirectionLights[i].intensity);
+  }
+  return DiffuseColor;
+}
+
+vec3 PointLightColor(vec3 NormalDirection){
+  vec3 DiffuseColor = vec3(0);
+  for(int i = 0; i < PointLightCount; ++i){
+    
+    //calculate the vector from this pixels surface to the light source
+    vec3 surfaceToLight = PointLights[i].position - position;
+
+    //calculate the cosine of the angle of incidence
+    float brightness = dot(NormalDirection, surfaceToLight) / (length(surfaceToLight) * length(NormalDirection));
+    brightness = clamp(brightness, 0, 1);
+
+    DiffuseColor += (PointLights[i].color * PointLights[i].intensity) * brightness;
+  }
+  return DiffuseColor;
+}
+
+
+
 void main(){
   vec4 texCol = texture(DiffuseTexture, TexCoord);
   vec4 normCol = texture(NormalTexture, TexCoord);
     
-  vec3 normalDir = normalize(TBN * ((normCol.xyz) * 2 - 1));
-
-  //ensure normal and light direction are normalised
-  vec3 N = normalDir;
-
-  // calculate each colour property
   vec3 ambient = mat.Ia * mat.Ka;
 
-  vec3 Specular = vec3(0);
-  vec3 Lighting = vec3(0);
-  for(int i = 0; i < DirectionLightCount; ++i){
-    vec3 L = normalize(DirectionLights[i].direction);
-    // calculate lambert term (negate light direction)
-    float lambertTerm = max( 0, dot( N, -L ) );
-    // calculate view vector and reflection vector
-    vec3 V = normalize(cameraPosition - position);
-    vec3 R = reflect( L, N ) * clamp(sign(dot(N, -L)), 0, 1);
-    // calculate specular term
-    Specular += pow( max(0, dot(R, V) ), mat.specularPower) * DirectionLights[i].color;
-    Lighting += lambertTerm * DirectionLights[i].color;
-  }
+  vec3 TransformedNormal = normalize(TBN * ((normCol.xyz) * 2 - 1));
 
-  // {
-  //   vec3 L = normalize(DirectionLights[0].direction);
+  vec3 Diffuse = DirectionLightColor(TransformedNormal);
+  Diffuse += PointLightColor(TransformedNormal);
+
+  // //ensure normal and light direction are normalised
+  // vec3 N = normalDir;
+
+  // // calculate each colour property
+
+  // vec3 Specular = vec3(0);
+  // vec3 Lighting = vec3(0);
+
+  // for(int i = 0; i < DirectionLightCount; ++i){
+  //   vec3 L = normalize(DirectionLights[i].direction);
   //   // calculate lambert term (negate light direction)
   //   float lambertTerm = max( 0, dot( N, -L ) );
   //   // calculate view vector and reflection vector
   //   vec3 V = normalize(cameraPosition - position);
   //   vec3 R = reflect( L, N ) * clamp(sign(dot(N, -L)), 0, 1);
   //   // calculate specular term
-  //   Specular += pow( max(0, dot(R, V) ), mat.specularPower);
-  //   Lighting += lambertTerm * DirectionLights[0].color;
-
-  //   FragColor = vec4(vec3(lambertTerm), 1);
+  //   Specular += pow( max(0, dot(R, V) ), mat.specularPower) * DirectionLights[i].color;
+  //   Lighting += lambertTerm * (DirectionLights[i].color * DirectionLights[i].intensity);
   // }
 
   // vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
   // vec3 specular = mat.Is * mat.Ks * specularTerm;
 
-  FragColor = vec4((Lighting + ambient) * texCol.xyz + Specular, 1);// + 0.0001 * vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1);
+  FragColor = vec4(Diffuse, 1) + 0.0001 * vec4((Diffuse + ambient) * texCol.xyz, 1);// + 0.0001 * vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1);
 }
+
+
 
 /*
   vec3 finalColor = vec3(0);
