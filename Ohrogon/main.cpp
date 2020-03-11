@@ -22,7 +22,7 @@
 #include "Shader.h"
 #include "Time.h"
 #include "Window.h"
-#include "test.h"
+#include "PointLights.h"
 #include "Color.h"
 #include "String.h"
 #include "DirectionLights.h"
@@ -112,8 +112,6 @@ int main() {
   Mesh prim = ModelLoader::LoadObj("./Objects/Orb/Orb.obj");
   prim.RecalculateNormals();
 
-  prim.CalculateTangents();
-
   prim.transform.Scale = Vector3(5.0f);
   sphere.transform.Scale = Vector3(5.0f);
   sphere.transform.Position = Vector3(0.0f, 0.0f, 10.0f);
@@ -140,11 +138,6 @@ int main() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
     glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels,
                 GL_UNSIGNED_BYTE, imageData);
@@ -163,11 +156,6 @@ int main() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
-    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
     glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels, GL_UNSIGNED_BYTE, imageData);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -177,11 +165,20 @@ int main() {
 
   Material m = Material(shader.ProgrammID);
 
-  DirectionLights lights = DirectionLights(shader, 4);
-  lights.length = 2;
-  lights[0].direction = -Vector3::up();
-  lights[1].direction = Vector3::right();
-  lights[1].color = Vector3(0.0f, 0.5f, 1.0f);
+  DirectionLights dirLights = DirectionLights(shader, 4);
+  dirLights.length = 2.0f;
+  dirLights[0].direction = Vector3::right();
+  dirLights[0].intensity = 1.0f;
+  dirLights[1].direction = -Vector3::up();
+  dirLights[1].color = Vector3(1.0f, 1.0f, 1.0f);
+  dirLights[1].intensity = .7f;
+
+  PointLights ptLights = PointLights(shader, 8);
+  ptLights.length = 1;
+  ptLights[0].color = Vector3::one();
+  ptLights[0].intensity = 1.0f;
+  ptLights[0].position = Vector3(5.0f, 0.0f, 1.0f);
+
 
   //DataBuffer LightArray = DataBuffer(shader.ProgrammID);
 
@@ -199,7 +196,6 @@ int main() {
       glGetUniformLocation(shader.ProgrammID, "ModelMatrix");
   auto CameraPosition =
       glGetUniformLocation(shader.ProgrammID, "cameraPosition");
-  // auto TextureUniform = glGetUniformLocation(shader.ProgrammID, "Texture");
 
   uint diffuseUniform = glGetUniformLocation(shader.ProgrammID, "DiffuseTexture");
   uint normalUniform  = glGetUniformLocation(shader.ProgrammID, "NormalTexture");
@@ -214,9 +210,6 @@ int main() {
   cam.aspectRatio = 16 / 9.0f;
   cam.NearPlane = 0.01f;
   cam.FarPlane = 100000.0f;
-
-  // plane.transform.Scale = Vector3::one() * 10.0f;
-  // plane.transform.Position = Vector3(-.5f, 0, -.5f);
 
   float f = 0.0f;
   Vector2 camRotation(0.0f, 0.0f);
@@ -240,23 +233,6 @@ int main() {
     if (Keyboard[KeyCode::ENTER] && Keyboard.altKey && Keyboard.shiftKey) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
-    /*if(done){
-                    printf("Done Flag set\n");
-                    done = false;
-                    prim = *m;
-    }*/
-
-    //{
-    //	int x, y;
-    //	int width, height;
-    //	glfwGetWindowSize(window, &width, &height);
-    //	glfwGetWindowPos(window, &x, &y);
-    //	Window::Position.x = x;
-    //	Window::Position.y = y;
-    //	Window::Width = width;
-    //	Window::Height = height;
-    //	Window::aspectRatio = ((float)width / height);
-    //}
 
     f += Time::DeltaTime;
 
@@ -319,24 +295,16 @@ int main() {
     cam.transform.Position += movement * Time::OneTime;
 
     Matrix4 pv_M = cam.getPVMatrix();
-    //Matrix4 ModelMatrix = prim.transform.updateTransform();
-    //glUniformMatrix4fv(MVPMatrixUniform, 1, false, pv_M * ModelMatrix);
-    //glUniformMatrix4fv(ModelMatrixUniform, 1, false, ModelMatrix);
     glUniform3fv(CameraPosition, 1, (GLfloat*)&cam.transform.Position);
-    // glUniform1i(TextureUniform, )
-
-    // plane.draw(MVPMatrixUniform, pv_M);
-
-    // cylinder.draw(MVPMatrixUniform, pv_M);
 
     prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime /  Math::PI(), 0);
 
-    // m.Bind();
-    //m.Ka = HSLtoRGB(Time, .2f, .2f);
-
     float Time = fmodf(Time::TotalTime * 100.0, 360.0f) / 360.0f;
-    lights[0].color = HSLtoRGB(Time, .2f, .2f);
-    lights.Bind();
+    dirLights[0].color = HSLtoRGB(Time, 1.0f, .5f);
+    ptLights[0].position = Vector3(sinf(Time::TotalTime * 2) * 5.0f, 0.0f, cosf(Time::TotalTime * 2) * 5.0f);
+
+    ptLights.Bind();
+    dirLights.Bind();
 
     m.Bind();
 
