@@ -62,7 +62,7 @@ class Shader{
 			// Provide the infolog in whatever manor you deem best.
 			// Exit with failure.
 			glDeleteShader(id); // Don't leak the shader.
-			throw "Cannot Compile the Shader";
+ 			throw "Cannot Compile the Shader";
 
 			return 0;
 		}

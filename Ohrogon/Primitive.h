@@ -171,7 +171,10 @@ public:
 			}
 			mesh.Vertices.push(Vector3(0.0f, -.5f, 0.0f));
 			
-			mesh.Vertices.forEach([](Vector3& e) {e.normalise(); });
+			mesh.Vertices.forEach([&mesh](Vector3& e) {
+				mesh.UVs.push(Vector2(1.0f, 1.0f));
+				e.normalise();
+			});
  
 			uint lastVertex = mesh.Vertices.length - 1;
 
@@ -198,7 +201,6 @@ public:
 				mesh.Indices.push({ ni, ni + RadiusSlices, index });
 				mesh.Indices.push({index + RadiusSlices, index, ni + RadiusSlices });
 			}
-
 
 			return mesh;
 		}

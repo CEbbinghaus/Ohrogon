@@ -22,11 +22,11 @@ public:
         Ka = Vector3::one() / 2;
         Kd = Vector3::one();
         Ks = Vector3::one();
-        Ia = Vector3::one();
+        Ia = Vector3::one() * 0.1;
         Id = Vector3::one();
         Is = Vector3::one();
 
-        LightDirection = -Vector3::up();
+        LightDirection = -Vector3::right();
 
         specularPower = 32.0f;
 
