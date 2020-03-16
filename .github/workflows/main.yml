@@ -53,6 +53,7 @@ jobs:
     - name: Commit Changes
       run: |
           cd Ohrogon/BuildBranch
+          git pull
           git config --local user.email "jecebbi@gmail.com"
           git config --local user.name "GitHub Action"
           git add .
