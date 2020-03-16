@@ -20,16 +20,6 @@ class MouseManager
 	{	
 		if (MouseManager::Instance == nullptr)return;
 
-
-		/*
-			Instance->pos->x = (float)xpos;
-			Instance->pos->y = (float)ypos;
-
-			Instance->delta->x = Instance->pos->x - Instance->lastPos->x;
-			Instance->delta->y = Instance->pos->y - Instance->lastPos->y;
-
-			*(Instance->lastPos) = *Instance->pos;
-		*/
 		Instance->delta->x = Instance->pos->x - (float)xpos;
 		Instance->delta->y = Instance->pos->y - (float)ypos;
 
