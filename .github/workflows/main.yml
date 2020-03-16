@@ -63,6 +63,6 @@ jobs:
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-        force: true
+        directory: "./Ohrogon/BuildBranch"
         branch: "Build"
         github_token: ${{ secrets.GITHUB_TOKEN }}
