@@ -9,6 +9,11 @@ in vec3 BiTangent;
 
 in mat3 TBN;
 
+struct LightData{
+  vec3 Diffuse;
+  vec3 Specular;
+};
+
 uniform PointLight{
   vec3 color;
   float intensity;
@@ -49,8 +54,8 @@ uniform sampler2D NormalTexture;
 out vec4 FragColor;
 
 
-vec3 DirectionLightColor(vec3 NormalDirection){
-  vec3 DiffuseColor = vec3(0);
+LightData DirectionLightColor(vec3 NormalDirection){
+  LightData data = LightData(vec3(0), vec3(0));
   for(int i = 0; i < DirectionLightCount; ++i){
 
     vec3 LightDirection = normalize(DirectionLights[i].direction);
@@ -58,20 +63,20 @@ vec3 DirectionLightColor(vec3 NormalDirection){
     // calculate lambert term (negate light direction)
     float lambertTerm = max( 0, dot( NormalDirection, -LightDirection));
 
-    // // calculate view vector and reflection vector
-    // vec3 ViewDirection = normalize(cameraPosition - position);
+    // calculate view vector and reflection vector
+    vec3 ViewDirection = normalize(cameraPosition - position);
 
-    // vec3 Reflection = reflect(LightDirection, NormalDirection) * clamp(sign(dot(NormalDirection, -LightDirection)), 0, 1);
-    // // calculate specular term
-    // Specular += pow( max(0, dot(Reflection, ViewDirection) ), mat.specularPower) * DirectionLights[i].color;
+    vec3 Reflection = reflect(LightDirection, NormalDirection) * clamp(sign(dot(NormalDirection, -LightDirection)), 0, 1);
+    // calculate specular term
+    data.Specular += pow( max(0, dot(Reflection, ViewDirection) ), mat.specularPower) * (DirectionLights[i].color * DirectionLights[i].intensity);
 
-    DiffuseColor += lambertTerm * (DirectionLights[i].color * DirectionLights[i].intensity);
+    data.Diffuse += (DirectionLights[i].color * DirectionLights[i].intensity) * lambertTerm ;//0.0001 + vec3(1) * 
   }
-  return DiffuseColor;
+  return data;
 }
 
-vec3 PointLightColor(vec3 NormalDirection){
-  vec3 DiffuseColor = vec3(0);
+LightData PointLightColor(vec3 NormalDirection){
+  LightData data = LightData(vec3(0), vec3(0));
   for(int i = 0; i < PointLightCount; ++i){
     
     //calculate the vector from this pixels surface to the light source
@@ -81,9 +86,16 @@ vec3 PointLightColor(vec3 NormalDirection){
     float brightness = dot(NormalDirection, surfaceToLight) / (length(surfaceToLight) * length(NormalDirection));
     brightness = clamp(brightness, 0, 1);
 
-    DiffuseColor += (PointLights[i].color * PointLights[i].intensity) * brightness;
+    // calculate view vector and reflection vector
+    vec3 ViewDirection = normalize(cameraPosition - position);
+
+    vec3 Reflection = reflect(-normalize(surfaceToLight), NormalDirection) * clamp(sign(dot(NormalDirection, normalize(surfaceToLight))), 0, 1);
+    // calculate specular term
+    data.Specular += pow( max(0, dot(Reflection, ViewDirection) ), mat.specularPower) * (PointLights[i].color * PointLights[i].intensity);
+
+    data.Diffuse += (PointLights[i].color * PointLights[i].intensity) * brightness * (pow(clamp(PointLights[i].radius - length(surfaceToLight), 0, 1), 1.1)); // 0.0001 + vec3(1) *
   }
-  return DiffuseColor;
+  return data;
 }
 
 
@@ -96,9 +108,11 @@ void main(){
 
   vec3 TransformedNormal = normalize(TBN * ((normCol.xyz) * 2 - 1));
 
-  vec3 Diffuse = DirectionLightColor(TransformedNormal);
-  Diffuse += PointLightColor(TransformedNormal);
+  LightData dirLights = DirectionLightColor(TransformedNormal);
+  LightData ptLights = PointLightColor(TransformedNormal);
 
+  vec3 Diffuse = dirLights.Diffuse + ptLights.Diffuse;
+  vec3 Specular = dirLights.Specular + ptLights.Specular;
   // //ensure normal and light direction are normalised
   // vec3 N = normalDir;
 
@@ -122,7 +136,7 @@ void main(){
   // vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
   // vec3 specular = mat.Is * mat.Ks * specularTerm;
 
-  FragColor = vec4(Diffuse, 1) + 0.0001 * vec4((Diffuse + ambient) * texCol.xyz, 1);// + 0.0001 * vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1);
+  FragColor = vec4((Diffuse + ambient) * texCol.xyz + Specular, 1);// + 0.0001 * vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1);
 }
 
 
