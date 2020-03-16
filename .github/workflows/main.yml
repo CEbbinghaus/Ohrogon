@@ -24,6 +24,8 @@ jobs:
     
     - name: Checkout Subrepositories
       run: git submodule update --init --recursive
+
+    - run: cd Ohrogon
     
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1
@@ -32,8 +34,6 @@ jobs:
       run: msbuild
       
     - run: cd Ohrogon
-    - run: dir
-      
       
     - name: Copy Models And Textures to Build Directory
       run: echo D | xcopy /S /E /Y .\data .\Build\Debug\data
@@ -41,9 +41,8 @@ jobs:
     - name: Create Intermediary Directory
       run: git clone "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" -b Build ./BuildBranch
    
-    
     - name: Move Build into Current Directory
-      run: move .\Build\Debug\ .\BuildBranch
+      run: xcopy /S /E /Y .\Build\Debug\* .\BuildBranch\*
       
     - run: cd BuildBranch
       
