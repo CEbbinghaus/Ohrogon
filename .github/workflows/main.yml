@@ -21,7 +21,7 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-    
+
     - name: Checkout Subrepositories
       run: git submodule update --init --recursive
     
@@ -40,9 +40,10 @@ jobs:
 
     
     - name: Create Intermediary Directory
-      run:  |
-        cd Ohrogon
-        git clone "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" -b Build ./BuildBranch
+      uses: actions/checkout@v2
+      with:
+        ref: "Build"
+        path: './Ohrogon/BuildBranch' 
    
     - name: Move Build into Current Directory
       run:  |
