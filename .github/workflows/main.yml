@@ -32,6 +32,8 @@ jobs:
       run: msbuild
       
     - run: cd Ohrogon
+    - run: dir
+      
       
     - name: Copy Models And Textures to Build Directory
       run: echo D | xcopy /S /E /Y .\data .\Build\Debug\data
