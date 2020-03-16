@@ -30,3 +30,23 @@ jobs:
 
     - name: Build Project
       run: msbuild
+      
+    - run: cd Ohrogon
+      
+    - name: Copy Models And Textures to Build Directory
+      run: xcopy .\data .\Build\Debug\data
+    
+    - name: Create Intermediary Directory
+      run: git clone "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" -b Build ./BuildBranch
+   
+    
+    - name: Move Build into Current Directory
+      run: move .\Build\Debug\ .\BuildBranch
+      
+    - run: cd BuildBranch
+      
+    - name: Commit Changes
+      run: |
+          git add .
+          git commit -m "Build Release"
+          git push
