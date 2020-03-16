@@ -53,6 +53,13 @@ jobs:
     - name: Commit Changes
       run: |
           cd Ohrogon/BuildBranch
+          git config --local user.email "jecebbi@gmail.com"
+          git config --local user.name "GitHub Action"
           git add .
           git commit -m "Build Release"
-          git push
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        branch: "Build"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
