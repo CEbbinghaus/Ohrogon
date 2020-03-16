@@ -5,7 +5,11 @@
 *.slo
 *.lo
 *.o
-*.obj
+
+__TMP/**/*.*
+Build/*.obj
+
+!**/Meshes/*
 
 # Precompiled Headers
 *.gch
@@ -14,7 +18,10 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+
+#Debugging Files
+*.pdb
+*.ilk
 
 # Fortran module files
 *.mod
@@ -24,9 +31,12 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
-*.exe
 *.out
 *.app
+
+.vs
+.vscode
+
+**/__TMP
