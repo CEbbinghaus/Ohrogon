@@ -34,7 +34,7 @@ jobs:
     - run: cd Ohrogon
       
     - name: Copy Models And Textures to Build Directory
-      run: xcopy .\data .\Build\Debug\data
+      run: echo D | xcopy /S /E /Y .\data .\Build\Debug\data
     
     - name: Create Intermediary Directory
       run: git clone "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" -b Build ./BuildBranch
