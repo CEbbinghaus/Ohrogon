@@ -98,9 +98,9 @@ int main() {
   Shader shader = Shader();
 
   uint VertShader =
-      shader.LoadShader("./Shaders/VertShader.vert", ShaderType::Vertex);
+      shader.LoadShader("./data/Shaders/VertShader.vert", ShaderType::Vertex);
   uint FragShader =
-      shader.LoadShader("./Shaders/FragShader.frag", ShaderType::Frag);
+      shader.LoadShader("./data/Shaders/FragShader.frag", ShaderType::Frag);
 
   shader.CompileShader();
 
@@ -109,7 +109,7 @@ int main() {
   // shader2.CompileShader({ VertShader, FragShader })
   Mesh sphere = Primitive::Sphere(20, 20);
   sphere.RecalculateNormals();
-  Mesh prim = ModelLoader::LoadObj("./Objects/Orb/Orb.obj");
+  Mesh prim = ModelLoader::LoadObj("./data/Objects/Orb/Orb.obj");
   prim.RecalculateNormals();
 
   prim.transform.Scale = Vector3(5.0f);
@@ -130,7 +130,7 @@ int main() {
   {
     int width, height, nrChannels;
     unsigned char *imageData =
-        stbi_load("./Objects/Orb/Diffuse.png", &width, &height, &nrChannels, 0);
+        stbi_load("./data/Objects/Orb/Diffuse.png", &width, &height, &nrChannels, 0);
 
     if (!imageData) throw "Couldnt Find Image";
 
@@ -148,7 +148,7 @@ int main() {
   {
     int width, height, nrChannels;
     unsigned char *imageData =
-        stbi_load("./Objects/Orb/Normal.png", &width, &height, &nrChannels, 0);
+        stbi_load("./data/Objects/Orb/Normal.png", &width, &height, &nrChannels, 0);
 
     if (!imageData) throw "Couldnt Find Image";
 
