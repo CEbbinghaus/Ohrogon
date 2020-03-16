@@ -29,7 +29,9 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Build Project
-      run: msbuild
+      run: |
+        cd Ohrogon
+        msbuild ../Ohrogon.sln
       
     - run: dir
       
@@ -63,6 +65,6 @@ jobs:
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-        directory: "./Ohrogon/BuildBranch"
+        directory: "Ohrogon/BuildBranch"
         branch: "Build"
         github_token: ${{ secrets.GITHUB_TOKEN }}
