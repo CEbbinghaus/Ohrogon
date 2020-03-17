@@ -1,8 +1,12 @@
 #pragma once;
 #include <stdarg.h>
 
+using uint = unsigned int;
+#define NoMem_EXCPT "Could Not Allocate Memory"
+
 class String {
-    const char* data;
+    uint length;
+    char* data;
 
     static int findMin(int x, int y, int z) {
         if (x <= y && x <= z)
@@ -11,6 +15,34 @@ class String {
             return y;
         else
             return z;
+    }
+
+    void allocateData(){
+        data = (char*)malloc(length + 1);
+        if (data == nullptr) throw NoMem_EXCPT;
+    }
+
+    static char* allocateData(uint length){
+        char* tmp = (char*)malloc(length + 1);
+        if (tmp == nullptr) throw NoMem_EXCPT;
+        return tmp;
+    }
+
+    void copyData(const char* source){
+        memcpy((void*)data, source, length);
+        data[length] = '\0';
+    }
+
+    static char* copyData(char* dest, char* src, uint length){
+        memcpy((void*)dest, src, length);
+        dest[length] = '\0';
+        return dest;
+    }
+
+    void destroyData() {
+        if (data != nullptr)
+            free((void*)data);
+        data = nullptr;
     }
 
    public:
@@ -69,18 +101,139 @@ class String {
         return answer;
     }
 
-    String(const char* data) : data(data) {}
+    String(const char* inData){
+
+        length = strlen(inData);
+        
+        allocateData();
+        copyData(inData);
+    }
+
+    String(const String& source){
+        length = source.length;
+        allocateData();
+        copyData(source.data);
+    }
+
+    String(String&& source) noexcept{
+        length = source.length;
+        data = source.data;
+        source.data = nullptr;
+    }
 
     ~String() {
-        //free((void*)data);
+        //Delete Data if it Exists
+        destroyData();
     }
 
-    bool operator ==(const String& other){
+    String& operator=(const String& other) {
+        destroyData();
+
+        //Assign and Allocate local Memory
+        length = other.length;
+
+        allocateData();
+        copyData(other.data);
+
+        return *this;
+    }
+
+    String& operator=(String&& other) noexcept {
+        destroyData();
+
+        //Assign and Allocate local Memory
+        length = other.length;
+        data = other.data;
+        other.data = nullptr;
+
+        return *this;
+    }
+
+    String& operator=(const char* inData) {
+        destroyData();
+
+        length = strlen(inData);
+        
+        allocateData();
+        copyData(inData);
+        
+        return *this;
+    }
+
+    bool operator ==(const String& other) {
         return strcmp(this->data, other.data) == 0;
     }
-    
-    bool operator !=(const String& other){
+
+    bool operator !=(const String& other) {
         return strcmp(this->data, other.data) != 0;
+    }
+
+    String operator +(const String& other) {
+        //Allocates the Combined Length of Both strings + 1 for the Null Terminator
+        uint totalLength = length + other.length;
+        char* strData = allocateData(totalLength);
+
+        //Copies the Data into the String and Sets the last character to Null
+        memcpy(strData, data, length);
+        memcpy(strData + length, other.data, other.length);
+        strData[totalLength - 1] = '\0';
+
+        String result = String(strData);
+        free(strData);
+        return result;
+    }
+
+    String operator+(const char* other) {
+        //Allocates the Combined Length of Both strings + 1 for the Null Terminator
+        uint otherLength = strlen(other);
+        uint totalLength = length + otherLength;
+        char* strData = allocateData(totalLength);
+
+        //Copies the Data into the String and Sets the last character to Null
+        memcpy(strData, data, length);
+        memcpy(strData + length, data, otherLength);
+        strData[totalLength] = '\0';
+
+        String result = String(strData);
+        free(strData);
+        return result;
+    }
+
+    String& operator+=(const String& other) {
+        //Allocates the Combined Length of Both strings + 1 for the Null Terminator
+        uint totalLength = length + other.length;
+        char* strData = allocateData(totalLength);
+
+        //Copies the Data into the String and Sets the last character to Null
+        memcpy(strData, data, length);
+        memcpy(strData + length, other.data, other.length);
+        strData[totalLength] = '\0';
+
+        //Update Values
+        destroyData();
+        data = strData;
+        length = totalLength;
+
+        return *this;
+    }
+
+    String& operator+=(const char* other) {
+        //Allocates the Combined Length of Both strings + 1 for the Null Terminator
+        uint otherLength = strlen(other);
+        uint totalLength = length + otherLength;
+        char* strData = allocateData(totalLength);
+
+        //Copies the Data into the String and Sets the last character to Null
+        memcpy(strData, data, length);
+        memcpy(strData + length, other, otherLength);
+        strData[totalLength] = '\0';
+
+        //Update Values
+        destroyData();
+        data = strData;
+        length = totalLength;
+
+        return *this;
     }
 
     operator const char*() {
