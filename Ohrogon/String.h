@@ -72,7 +72,7 @@ class String {
     String(const char* data) : data(data) {}
 
     ~String() {
-        free((void*)data);
+        //free((void*)data);
     }
 
     bool operator ==(const String& other){
