@@ -18,4 +18,8 @@ class Texture{
         file = path;
         data = stbi_load(file, &width, &height, (int*)&channels, 0);
     }
+
+    operator const unsigned char*(){
+        return data;
+    }
 };

@@ -132,12 +132,12 @@ enum class KeyCode : int {
 
 
 
-class KeyManager{
+class Keyboard{
 
 	class KeyArray{
 		bool data[KeyArraySize];
 
-	public:
+	  public:
 		void Set(int i, bool value){
 			data[i] = value;
 		}
@@ -162,58 +162,38 @@ class KeyManager{
 		}
 	};
 
-	KeyArray data;
-	KeyArray altdata;
+	static KeyArray data;
+	static KeyArray altdata;
 
-	static KeyManager* Instance;
+	static KeyArray pressed;
+	static KeyArray released;
 
-	GLFWwindow* window;
+	static bool ctrlKey;
+	static bool shiftKey;
+	static bool altKey;
+
+	static GLFWwindow* window;
 
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-		if(KeyManager::Instance == nullptr)return;
 
-		KeyManager::Instance->data.Set(key, (bool)action);
+		data.Set(key, (bool)action);
 
-		KeyManager::Instance->ctrlKey = mods & GLFW_MOD_CONTROL;
-		KeyManager::Instance->altKey = mods & GLFW_MOD_ALT;
-		KeyManager::Instance->shiftKey = mods & GLFW_MOD_SHIFT;
+		ctrlKey = mods & GLFW_MOD_CONTROL;
+		altKey = mods & GLFW_MOD_ALT;
+		shiftKey = mods & GLFW_MOD_SHIFT;
 	}
 
-	KeyManager(GLFWwindow* window){
-		/*data = new bool[KeyArraySize];
-		memset(data, 0, KeyArraySize * sizeof(bool));
-		
-		altdata = new bool[KeyArraySize];
-		memset(altdata, 0, KeyArraySize * sizeof(bool));*/
-
-		this->window = window;
-	}
-
-	void SwapArrays(){
+	static void SwapArrays(){
 		memcpy(&altdata, &data, KeyArraySize * sizeof(bool));
-		//bool* tmp = data;
-		//data = altdata;
-		//altdata = tmp;
 	}
 
 public:
-	bool ctrlKey;
-	bool shiftKey;
-	bool altKey;
-
-	KeyArray pressed;
-	KeyArray released;
-
-	KeyManager(KeyManager const&) = delete;
-	void operator=(KeyManager const&) = delete;
 
 	static void Update(){
-		if(!Instance)return;
-
-		auto& data = Instance->data;
-		auto& altdata = Instance->altdata;
-		auto& pressed = Instance->pressed;
-		auto& released = Instance->released;
+		auto& Keydata = data;
+		auto& Keyaltdata = altdata;
+		auto& Keypressed = pressed;
+		auto& Keyreleased = released;
 
 		for(int i = 0; i < KeyArraySize; ++i){
 			if(data[i] == altdata[i]){
@@ -230,54 +210,45 @@ public:
 			}
 		}
 
-		Instance->SwapArrays();
+		SwapArrays();
 	}
 
-	static KeyManager& CreateKeyManager(GLFWwindow* window) {
-		if (Instance != nullptr)
-			return *Instance;
+	static void RegisterKeyboard(GLFWwindow* glWindow) {
 
-		Instance = new KeyManager(window);
+		window = glWindow;
 
-		glfwSetKeyCallback(window, &(KeyManager::keyCallback));
-
-		return *Instance;
+		glfwSetKeyCallback(window, &(Keyboard::keyCallback));
 	}
 
-	static void DestroyKeyManager(){
-		//delete[] Instance->data;
-		//Instance->data = nullptr;
-		//
-		//delete[] Instance->altdata;
-		//Instance->altdata = nullptr;
-
-		delete Instance;
-		Instance = nullptr;
+	static bool CtrlKey(){
+		return ctrlKey;
+	}
+	static bool AltKey(){
+		return altKey;
+	}
+	static bool ShiftKey(){
+		return shiftKey;
 	}
 
-	bool operator[](char key) {
-		if (key > 96 && key < 123)
-			return data[key - 32];
-
-		return data[key];
-	}
-	
-	bool operator[](KeyCode key) {
+	static bool GetKey(KeyCode key) {
 		return data[(int)key];
 	}
-
-	static bool Get(char key) {
-		if (Instance == nullptr)return false;
-		if (key > 96 && key < 123)
-			return Instance->data[key - 32];
-
-		return Instance->data[key];
+	static bool GetKeyDown(KeyCode key) {
+		return pressed[(int)key];
 	}
-
-	static bool Get(KeyCode key) {
-		if (Instance == nullptr)return false;
-
-		return Instance->data[(int)key];
+	static bool GetKeyUp(KeyCode key) {
+		return released[(int)key];
 	}
 };
 
+Keyboard::KeyArray Keyboard::data;
+Keyboard::KeyArray  Keyboard::altdata;
+
+Keyboard::KeyArray  Keyboard::pressed;
+Keyboard::KeyArray  Keyboard::released;
+
+bool Keyboard::ctrlKey = false;
+bool Keyboard::shiftKey = false;
+bool Keyboard::altKey = false;
+
+GLFWwindow* Keyboard::window = nullptr;

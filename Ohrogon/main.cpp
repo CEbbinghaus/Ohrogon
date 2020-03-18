@@ -1,4 +1,3 @@
-#include <crtdbg.h>
 #include <gl_core_4_5.h>
 #include <glfw3.h>
 #include <chrono>
@@ -13,11 +12,11 @@
 #include <stb_image.h>
 
 #include "Camera.h"
-#include "KeyManager.h"
+#include "Keyboard.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
-#include "MouseManager.h"
+#include "Mouse.h"
 #include "Primitive.h"
 #include "Shader.h"
 #include "Time.h"
@@ -26,9 +25,24 @@
 #include "Color.h"
 #include "String.h"
 #include "DirectionLights.h"
+#include "Console.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
+
+#define _CRTDBG_MAP_ALLOC
+#include <cstdlib>
+#include <crtdbg.h>
+
+#ifdef _DEBUG
+  #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+  #define malloc(A) _dbgmalloc(__FILE,__LINE, (A) )
+  #define free(A) _dbgfree( __FILE__, __LINE__, (A) )
+    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+    // allocations to be of _CLIENT_BLOCK type
+#else
+    #define DBG_NEW new
+#endif
 
 // bool IsActive = true;
 //
@@ -42,7 +56,10 @@ using Clock = std::chrono::steady_clock;
 //}
 
 int main() {
-  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  // #ifdef _DEBUG
+  //   #define _CRTDBG_MAP_ALLOC
+  //   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  // #endif
 
   if (glfwInit() == false) return -1;
 
@@ -70,11 +87,12 @@ int main() {
 
   stbi_set_flip_vertically_on_load(true);
 
+  Console::Error("Figured you would like to see an Error");
   // turn VSync off
   // glfwSwapInterval(0);
 
   // Key Manager Initialization
-  KeyManager &Keyboard = KeyManager::CreateKeyManager(window);
+  Keyboard::RegisterKeyboard(window);
 
   // Mouse Configuration Options
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -82,7 +100,7 @@ int main() {
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
   // Mouse Initialization
-  MouseManager Mouse = MouseManager::CreateMouseManager(window);
+  Mouse::RegisterMouse(window);
   //{
   //	int x, y;
   //	int width, height;
@@ -220,17 +238,17 @@ int main() {
   glPolygonMode(GL_FRONT, GL_FILL);
 
   while (glfwWindowShouldClose(window) == false &&
-         !(Keyboard.altKey && Keyboard.shiftKey &&
-           Keyboard[KeyCode::DELETE_Key])) {
+         !(Keyboard::AltKey() && Keyboard::ShiftKey() &&
+           Keyboard::GetKeyDown(KeyCode::DELETE_Key))) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // if(IsActive){
     glfwPollEvents();
-    Keyboard.Update();
+    Keyboard::Update();
     //}
 
     Time::Update();
 
-    if (Keyboard[KeyCode::ENTER] && Keyboard.altKey && Keyboard.shiftKey) {
+    if (Keyboard::GetKeyDown(KeyCode::ENTER) && Keyboard::AltKey() && Keyboard::ShiftKey()) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
@@ -238,7 +256,7 @@ int main() {
 
     // prim.transform.Rotation = Vector3::up() * f;
 
-    if (f > 0.5f) camRotation += (Mouse.GetDelta() * 0.005f) * Time::OneTime;
+    if (f > 0.5f) camRotation += (Mouse::GetDelta() * 0.005f) * Time::OneTime;
 
     camRotation.y = Math::clamp(camRotation.y, -1.2f, 1.2f);
 
@@ -251,19 +269,19 @@ int main() {
 
     Vector3 movement;
 
-    if (Keyboard['w']) movement += forward * 0.1;
+    if (Keyboard::GetKey(KeyCode::W)) movement += forward * 0.1;
 
-    if (Keyboard['s']) movement += -forward * 0.1;
+    if (Keyboard::GetKey(KeyCode::S)) movement += -forward * 0.1;
 
-    if (Keyboard['d']) movement += -right * 0.1;
+    if (Keyboard::GetKey(KeyCode::D)) movement += -right * 0.1;
 
-    if (Keyboard['a']) movement += right * 0.1;
+    if (Keyboard::GetKey(KeyCode::A)) movement += right * 0.1;
 
-    if (Keyboard[' ']) movement += up * 0.1;
+    if (Keyboard::GetKey(KeyCode::SPACE)) movement += up * 0.1;
 
-    if (Keyboard[KeyCode::LEFT_CONTROL]) movement += -up * 0.1;
+    if (Keyboard::GetKey(KeyCode::LEFT_CONTROL)) movement += -up * 0.1;
 
-    if (Keyboard.pressed['m']) {
+    if (Keyboard::GetKeyDown(KeyCode::M)) {
       if (Wireframe) {
         glEnable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT, GL_FILL);
@@ -275,20 +293,10 @@ int main() {
       }
     }
 
-    if (Keyboard.pressed['l']) {
-      if (FlatShaded) {
-        prim.FlatShade();
-        FlatShaded = false;
-      } else {
-        prim.SmoothShade();
-        FlatShaded = true;
-      }
-    }
-
-    if(Keyboard.pressed[KeyCode::F5])
+    if(Keyboard::GetKeyDown(KeyCode::F5))
       shader.Reload();
 
-    if (Keyboard[KeyCode::ESCAPE]) {
+    if (Keyboard::GetKeyDown(KeyCode::ESCAPE)) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
@@ -327,11 +335,10 @@ int main() {
     
     glfwSwapBuffers(window);
 
-    MouseCallbackHelper::Callback(window);
+    Mouse::Update();
   }
 
-  Keyboard.DestroyKeyManager();
-  Mouse.DestroyMouseManager();
+  _CrtDumpMemoryLeaks();
 
   glfwDestroyWindow(window);
   glfwTerminate();
