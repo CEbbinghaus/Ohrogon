@@ -26,6 +26,7 @@
 #include "String.h"
 #include "DirectionLights.h"
 #include "Console.h"
+#include "Object.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -87,7 +88,9 @@ int main() {
 
   stbi_set_flip_vertically_on_load(true);
 
-  Console::Error("Figured you would like to see an Error");
+  Console::Error("This is a Error");
+  Console::Warning("This is a Warning");
+  Console::Log("This is a Log");
   // turn VSync off
   // glfwSwapInterval(0);
 
@@ -125,6 +128,8 @@ int main() {
   // Shader shader2 = Shader();
 
   // shader2.CompileShader({ VertShader, FragShader })
+    Object test1 = Object();
+
   Mesh sphere = Primitive::Sphere(20, 20);
   sphere.RecalculateNormals();
   Mesh prim = ModelLoader::LoadObj("./data/Objects/Orb/Orb.obj");

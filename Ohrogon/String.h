@@ -2,7 +2,6 @@
 #include <stdarg.h>
 
 using uint = unsigned int;
-#define NoMem_EXCPT "Could Not Allocate Memory"
 
 class String {
     uint length;
@@ -19,12 +18,12 @@ class String {
 
     void allocateData(){
         data = (char*)malloc(length + 1);
-        if (data == nullptr) throw NoMem_EXCPT;
+        if (data == nullptr) throw std::bad_alloc();
     }
 
     static char* allocateData(uint length){
         char* tmp = (char*)malloc(length + 1);
-        if (tmp == nullptr) throw NoMem_EXCPT;
+        if (tmp == nullptr) throw  std::bad_alloc();
         return tmp;
     }
 
@@ -99,6 +98,12 @@ class String {
         delete[] d;
 
         return answer;
+    }
+
+    String(){
+        length = 1;
+        allocateData();
+        data[0] = '\0';
     }
 
     String(const char* inData){
@@ -176,7 +181,7 @@ class String {
         //Copies the Data into the String and Sets the last character to Null
         memcpy(strData, data, length);
         memcpy(strData + length, other.data, other.length);
-        strData[totalLength - 1] = '\0';
+        strData[totalLength] = '\0';
 
         String result = String(strData);
         free(strData);
@@ -191,7 +196,7 @@ class String {
 
         //Copies the Data into the String and Sets the last character to Null
         memcpy(strData, data, length);
-        memcpy(strData + length, data, otherLength);
+        memcpy(strData + length, other, otherLength);
         strData[totalLength] = '\0';
 
         String result = String(strData);
@@ -236,7 +241,11 @@ class String {
         return *this;
     }
 
-    operator const char*() {
+    const char* CString() const{
+        return data;
+    }
+
+    operator const char*() const{
         return data;
     }
 };

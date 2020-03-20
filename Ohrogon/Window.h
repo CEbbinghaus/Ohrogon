@@ -50,3 +50,5 @@ public:
 
 	
 };
+
+float Window::aspectRatio = 1.0f;
