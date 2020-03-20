@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include "String.h"
 
@@ -6,10 +8,12 @@
 #endif
 
 #define RED "\033[1;31m"
-#define BLUE "\033[1;34m"
+#define BLUE "\033[38;5;39m"
 #define CYAN "\033[1;36m"
 #define GREEN "\033[1;32m"
 #define YELLOW "\033[1;33m"
+#define ORANGE "\033[38;5;166m"
+#define TESTING "\033[0;2;127;238;255m"
 #define Nothing "\033[0m"
 
 
@@ -40,17 +44,16 @@ class Console{
     }
   public:
     
-    static void Log(const String& message, const char* file, const char* line){
-        printf("Log: %s", message);
+    static void Log(const String& message){
+        printf((String::format("%sLog:%s ", BLUE, Nothing) + message) + "\n");
+    }
+
+    static void Warning(const String& message){
+        printf((String::format("%sWarning:%s ", ORANGE, Nothing) + message) + "\n");
     }
 
     static void Error(const String& message){
-        String formatter = String::format("%sError:%s %s\n", RED, Nothing, "%s");
-        printf(formatter, message);
-    }
-    static void Error(const String& message){
-        String formatter = String::format("%Warning:%s %s\n", YELLOW, Nothing, "%s");
-        printf(formatter, message);
+        printf((String::format("%sError:%s ", RED, Nothing) + message) + "\n");
     }
 };
 
@@ -60,5 +63,7 @@ int Console::statusCode = Console::init();
 #undef BLUE
 #undef CYAN
 #undef GREEN
+#undef ORANGE
 #undef YELLOW
+#undef TESTING
 #undef Nothing

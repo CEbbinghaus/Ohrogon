@@ -1,3 +1,5 @@
+#pragma once
+
 #include <atyp_Vectors.h>
 #include "StructBuffer.h"
 

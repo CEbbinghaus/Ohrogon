@@ -3,6 +3,8 @@
 #include <atyp_Transform.h>
 #include <atyp_Vector3.h>
 #include <gl_core_4_5.h>
+#include "Component.h"
+
 
 using uint = unsigned int;
 
@@ -18,7 +20,7 @@ struct MeshData {
 };
 
 //TODO: Optimise the VRam Buffer Allocation and Rewriting
-class Mesh : public MeshData {
+class Mesh : public MeshData, public Component {
    public:
     uint VAO;
     uint VBO;
@@ -417,14 +419,4 @@ class Mesh : public MeshData {
         SetTangents(TangentBuffer);
         SetBiTangents(BiTangentBuffer);
     }
-
-    //Mesh& operator=(const Mesh& original){
-    //	Vertices = original.Vertices;
-    //	Normals = original.Normals;
-    //	Colors = original.Colors;
-    //	UVs = original.UVs;
-
-    //	BindUVs();
-    //	return *this;
-    //}
 };

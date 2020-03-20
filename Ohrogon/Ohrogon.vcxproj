@@ -168,11 +168,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Dependencies\glcore\gl_core_4_5.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayStructBuffer.h" />
@@ -188,6 +185,7 @@
     <ClInclude Include="StructBuffer.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\FragShader.glsl" />

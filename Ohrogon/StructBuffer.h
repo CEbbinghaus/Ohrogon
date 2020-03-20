@@ -251,7 +251,7 @@ class ArrayStructBuffer {
         void Bind() {
             glUniformBlockBinding(parent->ProgramID, blockIndex, bindIndex);
 
-            for (int i = 0; i < parent->variables.length; ++i) {
+            for (uint i = 0; i < parent->variables.length; ++i) {
                 auto& v = parent->variables[i];
                 memcpy((char*)data + (int)v.offset, (char*)this + v.location, v.size);
             }
