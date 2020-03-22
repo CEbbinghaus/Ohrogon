@@ -21,6 +21,8 @@ struct MeshData {
 
 //TODO: Optimise the VRam Buffer Allocation and Rewriting
 class Mesh : public MeshData, public Component {
+
+
    public:
     uint VAO;
     uint VBO;
@@ -418,5 +420,9 @@ class Mesh : public MeshData, public Component {
 
         SetTangents(TangentBuffer);
         SetBiTangents(BiTangentBuffer);
+    }
+
+    Symbol _IDENTIFIER(){
+        return Symbol("Component.Mesh");
     }
 };
