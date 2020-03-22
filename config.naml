@@ -1,0 +1,20 @@
+output: ./Build/Debug/Ohrogon
+tmp: ./__TMP/
+
+cppVersion: c++17
+
+compile[]:
+	./main.cpp
+
+include[]:
+	./Dependencies/atyp/
+	./Dependencies/glfw/includes/
+	./Dependencies/stbi/
+	./Dependencies/glcore/
+
+libdir[]:
+	./Dependencies/glfw/
+
+libfile[]:
+	glfw3.lib
+	opengl32.lib
