@@ -14,7 +14,7 @@ public:
 
 	static GLFWwindow* ptr;
 
-	static union{
+	union{
 		struct{
 			float Width;
 			float Height;

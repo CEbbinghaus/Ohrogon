@@ -1,0 +1,5 @@
+[submodule "Dependencies/atyp"]
+ path = Dependencies/atyp
+ url = https://github.com/CEbbinghaus/StandardLibary
+ branch = g++
+

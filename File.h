@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+using string = std::string;
+
 class File {
 public:
 	static String ReadText(const char* filepath) {

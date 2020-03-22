@@ -1,7 +1,7 @@
 output: ./Build/Debug/Ohrogon
 tmp: ./__TMP/
 
-cppVersion: c++17
+cppVersion: c++11
 
 compile[]:
 	./main.cpp
@@ -18,3 +18,6 @@ libdir[]:
 libfile[]:
 	glfw3.lib
 	opengl32.lib
+
+arguments[]:
+	-lm

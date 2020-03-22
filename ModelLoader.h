@@ -19,18 +19,11 @@ class ModelLoader {
   }
 
   static Array<Array<const char*>*> Triangulate(Array<const char*>* data) {
-    if (data->length <= 3) {
-      return Array({new Array(*data)});
-    } else if (data->length == 4) {
-      return Array({new Array({(*data)[0], (*data)[1], (*data)[2]}),
-                    new Array({(*data)[2], (*data)[3], (*data)[0]})});
-    } else {
-      Array<Array<const char*>*> result;
-      for (int i = 1; i < data->length - 1; ++i) {
-        result.push(new Array({(*data)[0], (*data)[i], (*data)[i + 1]}));
-      }
-      return result;
+    Array<Array<const char*>*> result;
+    for (int i = 1; i < data->length - 1; ++i) {
+      result.push(new Array<const char*>({(*data)[0], (*data)[i], (*data)[i + 1]}));
     }
+    return result;
   }
 
   static Array<const char*> SplitString(const char* data,

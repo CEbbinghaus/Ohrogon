@@ -33,12 +33,13 @@ class Console{
             {
                 return 1;
             }
-
-            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-            if (!SetConsoleMode(hOut, dwMode))
-            {
-                return 1;
-            }
+            #ifdef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                if (!SetConsoleMode(hOut, dwMode))
+                {
+                    return 1;
+                }
+            #endif
         #endif
         return 0;
     }

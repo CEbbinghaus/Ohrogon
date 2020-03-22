@@ -1,7 +1,8 @@
-#pragma once;
+#pragma once
 
 #include <gl_core_4_5.h>
 #include <atyp_Array.h>
+#include <type_traits>
 
 #include <atyp_String.h>
 
@@ -13,6 +14,7 @@ template <
     typename T,
     class = typename std::enable_if<std::is_class<T>::value, T>::type>
 class StructBuffer : public T{
+Fixed All Build Issues. Need to Find .a file Equivalents for .lib files
 private:
     struct Variable
     {
