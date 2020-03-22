@@ -25,7 +25,6 @@ class GameObject{
     T* AddComponent(){
         T* component = new T();
         components.push(component);
-        Console::Log("Added Component");
         return component;
     }
 

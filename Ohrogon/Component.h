@@ -6,7 +6,6 @@
 
 class Component{
     friend Game;
-    Symbol symbol = Symbol("Component.Base");;
 
 public:
 
@@ -15,4 +14,8 @@ public:
     virtual void Setup(){}
     
     virtual void Execute(){}
+
+    virtual Symbol _IDENTIFIER(){
+        return Symbol("Component.Base");
+    }
 };
