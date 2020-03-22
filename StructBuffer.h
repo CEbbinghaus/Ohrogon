@@ -1,7 +1,8 @@
-#pragma once;
+#pragma once
 
 #include <gl_core_4_5.h>
 #include <atyp_Array.h>
+#include <type_traits>
 
 #include "String.h"
 
@@ -11,7 +12,7 @@ uint HighestBindIndex = 0;
 
 template <
     typename T,
-    class = typename std::enable_if_t<std::is_class_v<T>, T>>
+    class = typename std::enable_if<std::is_class<T>::value, T>::type>
 class StructBuffer : public T
 {
 private:

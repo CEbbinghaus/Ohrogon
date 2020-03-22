@@ -7,7 +7,7 @@
 
 using string = std::string;
 
-static class File {
+class File {
 public:
 	static string ReadText(const char* filepath) {
 		std::ifstream file(filepath);

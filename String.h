@@ -1,4 +1,4 @@
-#pragma once;
+#pragma once
 #include <stdarg.h>
 
 using uint = unsigned int;

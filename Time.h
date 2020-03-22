@@ -1,6 +1,6 @@
 #pragma once
 
-static class Time {
+class Time {
 	static double lastTime;
 
 public:
