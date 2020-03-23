@@ -35,15 +35,15 @@ using Clock = std::chrono::steady_clock;
 #include <cstdlib>
 #include <crtdbg.h>
 
-#ifdef _DEBUG
-  #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-  #define malloc(A) _dbgmalloc(__FILE,__LINE, (A) )
-  #define free(A) _dbgfree( __FILE__, __LINE__, (A) )
-    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-    // allocations to be of _CLIENT_BLOCK type
-#else
-    #define DBG_NEW new
-#endif
+// #ifdef _DEBUG
+//   #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+//   #define malloc(A) _dbgmalloc(__FILE,__LINE, (A) )
+//   #define free(A) _dbgfree( __FILE__, __LINE__, (A) )
+//     // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+//     // allocations to be of _CLIENT_BLOCK type
+// #else
+//     #define DBG_NEW new
+// #endif
 
 // bool IsActive = true;
 //
@@ -57,10 +57,10 @@ using Clock = std::chrono::steady_clock;
 //}
 
 int main() {
-  // #ifdef _DEBUG
-  //   #define _CRTDBG_MAP_ALLOC
-  //   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-  // #endif
+  #ifdef _DEBUG
+    #define _CRTDBG_MAP_ALLOC
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  #endif
 
   if (glfwInit() == false) return -1;
 
@@ -303,6 +303,13 @@ int main() {
 
     if (Keyboard::GetKeyDown(KeyCode::ESCAPE)) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    if (Keyboard::GetKeyDown(KeyCode::C)) {
+      if(cam.type == CameraType::Perspective)
+        cam.type = CameraType::Orthographic;
+      else
+        cam.type = CameraType::Perspective;
     }
 
     cam.transform.Position += movement * Time::OneTime;

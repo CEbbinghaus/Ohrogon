@@ -37,8 +37,8 @@ class Shader{
 	Array<uint> sourceIDs;
 	Array<uint> compiledIDs;
 
-	static uint CompileSource(string data, GLint flag) {
-		const char* dataSrc = data.c_str();
+	static uint CompileSource(const String& data, GLint flag) {
+		const char* dataSrc = data;
 		uint id = glCreateShader(flag);
 
 		glShaderSource(id, 1, (const GLchar**)&dataSrc, 0);

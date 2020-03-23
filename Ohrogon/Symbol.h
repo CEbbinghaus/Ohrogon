@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "String.h"
+#include <atyp_String.h>
 
 class Symbol{
     static std::hash<std::string> hash;

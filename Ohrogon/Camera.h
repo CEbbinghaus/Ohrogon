@@ -20,14 +20,17 @@ public:
 
 	Transform transform;
 	
-	CameraType type;
+	CameraType type = CameraType::Perspective;
 	
 	Matrix4 getViewMatrix(){
 		return Matrix4::Invert(transform.updateTransform());
 	}
 
 	Matrix4 getProjectionMatrix(){
-		return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
+		if(type == CameraType::Perspective)
+			return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
+		if(type == CameraType::Orthographic)
+			return Matrix4::Orthographic(fov * 10, fov * 10 * aspectRatio, NearPlane, FarPlane);
 	}
 
 	Matrix4 getPVMatrix(){

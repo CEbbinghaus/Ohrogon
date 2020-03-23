@@ -22,7 +22,6 @@ struct MeshData {
 //TODO: Optimise the VRam Buffer Allocation and Rewriting
 class Mesh : public MeshData, public Component {
 
-
    public:
     uint VAO;
     uint VBO;
@@ -30,7 +29,7 @@ class Mesh : public MeshData, public Component {
 
     Transform transform;
 
-    Mesh() {
+    Mesh(){
         GenerateBuffers();
 
         glBindVertexArray(VAO);

@@ -107,7 +107,7 @@ class ModelLoader {
  public:
   static Mesh LoadObj(const char* path) {
     auto file = File::ReadText(path);
-    auto adr = CleanString(file.data());
+    auto adr = CleanString(file);
 
     Array<Vector3> vertexBuffer;
     Array<Vector3> normalBuffer;
