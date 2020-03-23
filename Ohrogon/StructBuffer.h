@@ -3,7 +3,7 @@
 #include <gl_core_4_5.h>
 #include <atyp_Array.h>
 
-#include "String.h"
+#include <atyp_String.h>
 
 using uint = unsigned int;
 uint HighestBindIndex = 0;
@@ -11,9 +11,9 @@ uint HighestBindIndex = 0;
 
 template <
     typename T,
-    class = typename std::enable_if_t<std::is_class_v<T>, T>>
+    class = typename std::enable_if<std::is_class<T>::value, T>::type>
 class StructBuffer : public T{
-  private:
+private:
     struct Variable
     {
         uint size;

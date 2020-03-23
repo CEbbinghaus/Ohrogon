@@ -1,15 +1,13 @@
 #pragma once
 
-#include <string>
+#include <atyp_String.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-using string = std::string;
-
-static class File {
+class File {
 public:
-	static string ReadText(const char* filepath) {
+	static String ReadText(const char* filepath) {
 		std::ifstream file(filepath);
 		std::stringstream fileData;
 
@@ -18,7 +16,7 @@ public:
 
 			file.close();
 
-			return fileData.str();
+			return String(fileData.str().c_str());
 		}
 		else
 			throw "Could not Load File";
