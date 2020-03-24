@@ -1,7 +1,7 @@
 #pragma once;
 
 #include <atyp_Vectors.h>
-#include "StructBuffer.h";
+#include "StructBuffer.h"
 
 struct DirectionLight {
   Vector3 color = Vector3::one();

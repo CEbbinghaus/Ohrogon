@@ -6,7 +6,7 @@
 #include "Mesh.h"
 
 class Primitive {
-public:
+  public:
 	static struct{
 		static MeshData Plane(uint faces){
 			Array verts = Array<Vector3>((faces + 1) * (faces + 1));
@@ -259,7 +259,7 @@ public:
 			return mesh;
 
 		}
-} raw;
+	} raw;
 
 	static Mesh Plane(uint faces) {
 		auto data = raw.Plane(faces);

@@ -186,25 +186,6 @@ int main() {
     stbi_image_free(imageData);
   }
 
-  Material m = Material(shader.ProgrammID);
-
-  DirectionLights dirLights = DirectionLights(shader, 4);
-  dirLights.length = 2.0f;
-  dirLights[0].direction = Vector3::right();
-  dirLights[0].intensity = 1.0f;
-  dirLights[1].direction = -Vector3::up();
-  dirLights[1].color = Vector3(1.0f, 1.0f, 1.0f);
-  dirLights[1].intensity = .7f;
-
-  PointLights ptLights = PointLights(shader, 8);
-  ptLights.length = 1;
-  ptLights[0].color = Vector3::one();
-  ptLights[0].intensity = 1.0f;
-  ptLights[0].position = Vector3(5.0f, 0.0f, 1.0f);
-
-
-  //DataBuffer LightArray = DataBuffer(shader.ProgrammID);
-
 
   bool Wireframe = false;
 
@@ -246,57 +227,25 @@ int main() {
          !(Keyboard::AltKey() && Keyboard::ShiftKey() &&
            Keyboard::GetKeyDown(KeyCode::DELETE_Key))) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // if(IsActive){
     glfwPollEvents();
     Keyboard::Update();
-    //}
 
     Time::Update();
 
-    if (Keyboard::GetKeyDown(KeyCode::ENTER) && Keyboard::AltKey() && Keyboard::ShiftKey()) {
-      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
-
-    f += Time::DeltaTime;
-
-    // prim.transform.Rotation = Vector3::up() * f;
-
-    if (f > 0.5f) camRotation += (Mouse::GetDelta() * 0.005f) * Time::OneTime;
-
-    camRotation.y = Math::clamp(camRotation.y, -1.2f, 1.2f);
-
-    cam.transform.Rotation =
-        Quaternion::euler(camRotation.y, camRotation.x, 0.0f);
-
-    Vector3 forward = cam.transform.forward();
-    Vector3 right = cam.transform.right();
+    Vector3 right =  Vector3::right();
     Vector3 up = Vector3::up();
 
     Vector3 movement;
 
-    if (Keyboard::GetKey(KeyCode::W)) movement += forward * 0.1;
+    if (Keyboard::GetKey(KeyCode::W)) movement += up * 0.1;
 
-    if (Keyboard::GetKey(KeyCode::S)) movement += -forward * 0.1;
+    if (Keyboard::GetKey(KeyCode::S)) movement += -up * 0.1;
 
     if (Keyboard::GetKey(KeyCode::D)) movement += -right * 0.1;
 
     if (Keyboard::GetKey(KeyCode::A)) movement += right * 0.1;
 
-    if (Keyboard::GetKey(KeyCode::SPACE)) movement += up * 0.1;
-
-    if (Keyboard::GetKey(KeyCode::LEFT_CONTROL)) movement += -up * 0.1;
-
-    if (Keyboard::GetKeyDown(KeyCode::M)) {
-      if (Wireframe) {
-        glEnable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT, GL_FILL);
-        Wireframe = false;
-      } else {
-        glDisable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        Wireframe = true;
-      }
-    }
+    cam.transform.Position += movement * Time::OneTime;
 
     if(Keyboard::GetKeyDown(KeyCode::F5))
       shader.Reload();
@@ -312,34 +261,17 @@ int main() {
         cam.type = CameraType::Perspective;
     }
 
-    cam.transform.Position += movement * Time::OneTime;
-
     Matrix4 pv_M = cam.getPVMatrix();
     glUniform3fv(CameraPosition, 1, (GLfloat*)&cam.transform.Position);
 
     prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime /  Math::PI(), 0);
 
-    float Time = fmodf(Time::TotalTime * 100.0, 360.0f) / 360.0f;
-    dirLights[0].color = HSLtoRGB(Time, 1.0f, .5f);
-    ptLights[0].position = Vector3(sinf(Time::TotalTime * 2) * 5.0f, 0.0f, cosf(Time::TotalTime * 2) * 5.0f);
-
-    ptLights.Bind();
-    dirLights.Bind();
-
-    m.Bind();
-
     {
-
       diffuseUniform = glGetUniformLocation(shader.ProgrammID, "DiffuseTexture");
-      normalUniform  = glGetUniformLocation(shader.ProgrammID, "NormalTexture");
-
       // Then bind the uniform samplers to texture units:
       glUniform1i(diffuseUniform, 0);
-      glUniform1i(normalUniform,  1);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, texture);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, texture1);
     }
 
     sphere.draw(MVPMatrixUniform, ModelMatrixUniform, pv_M);

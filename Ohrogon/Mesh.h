@@ -97,20 +97,21 @@ class Mesh : public MeshData, public Component {
         uint length = Vertices.length * sizeof(Vector3);
 
         glDisableVertexAttribArray(1);
-        if (Normals.length) {
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
+        if (UVs.length) {
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)(length));
             glEnableVertexAttribArray(1);
+
+            length += UVs.length * sizeof(Vector2);
+        }
+
+        glDisableVertexAttribArray(2);
+        if (Normals.length) {
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)(length));
+            glEnableVertexAttribArray(2);
 
             length += Normals.length * sizeof(Vector3);
         }
 
-        glDisableVertexAttribArray(2);
-        if (UVs.length) {
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)(length));
-            glEnableVertexAttribArray(2);
-
-            length += UVs.length * sizeof(Vector2);
-        }
 
         glDisableVertexAttribArray(3);
         if (Tangents.length) {
