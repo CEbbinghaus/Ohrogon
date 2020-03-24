@@ -20,8 +20,8 @@ class GameObject{
   public:
     Transform transform;
 
-    template<typename T,
-    typename = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+    template<class T,
+    class = class std::enable_if<std::is_base_of<Component, T>::value>::type>
     T* AddComponent(){
         T* component = new T();
         components.push(component);

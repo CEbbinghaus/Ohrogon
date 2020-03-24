@@ -5,8 +5,7 @@
 class Window{
 	static Window* Instance;
 
-	Window(){
-	}
+	Window(){}
 public:
 
 	Window(const Window&) = delete;
@@ -14,7 +13,7 @@ public:
 
 	static GLFWwindow* ptr;
 
-	static union{
+	union{
 		struct{
 			float Width;
 			float Height;
@@ -22,12 +21,12 @@ public:
 		Vector2 size;
 	};
 
-	static struct{
+	struct{
 		int x = -1;
 		int y = -1;
 	} Position;
 
-	static float aspectRatio;
+	float aspectRatio;
 
 	static Window& Create(GLFWwindow* glwindow){
 		static Window* window = new Window();
@@ -41,7 +40,7 @@ public:
 		Instance = nullptr;
 	}
 
-	static void Update(){
+	void Update(){
 		int x, y;
 		int width, height;
 		glfwGetWindowPos(ptr, &x, &y);
@@ -51,4 +50,4 @@ public:
 	
 };
 
-float Window::aspectRatio = 1.0f;
+//float Window::aspectRatio = 1.0f;

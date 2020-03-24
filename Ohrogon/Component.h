@@ -10,10 +10,8 @@ class Component{
     friend Game;
 
 public:
-
-
     virtual void Setup(){}
-    
+
     virtual void Execute(){}
 
     virtual Symbol _IDENTIFIER(){
@@ -28,11 +26,12 @@ public:
 class ComponentManager{
     friend Game;
     friend Component;
-
+  protected:
     ComponentManager(){}
-public:
+  public:
     virtual void Setup() = 0;
     virtual void Register(Component*) = 0;
+    virtual void DeRegister(Component*) = 0;
     virtual void Execute() = 0;
     virtual void Destroy() = 0;
 };
