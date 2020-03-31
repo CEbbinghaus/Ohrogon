@@ -27,6 +27,7 @@
 #include "DirectionLights.h"
 #include "Console.h"
 #include "Object.h"
+#include "Game.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -35,44 +36,24 @@ using Clock = std::chrono::steady_clock;
 #include <cstdlib>
 #include <crtdbg.h>
 
-// #ifdef _DEBUG
-//   #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-//   #define malloc(A) _dbgmalloc(__FILE,__LINE, (A) )
-//   #define free(A) _dbgfree( __FILE__, __LINE__, (A) )
-//     // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-//     // allocations to be of _CLIENT_BLOCK type
-// #else
-//     #define DBG_NEW new
-// #endif
-
-// bool IsActive = true;
-//
-// void window_focus_callback(GLFWwindow* window, int focused){
-//	if(focused){
-//		IsActive = true;// The window gained input focus
-//	} else{
-//		IsActive = false;
-//		// The window lost input focus
-//	}
-//}
-
 int main() {
   #ifdef _DEBUG
     #define _CRTDBG_MAP_ALLOC
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
   #endif
 
+
   if (glfwInit() == false) return -1;
 
   GLFWwindow *window =
       glfwCreateWindow(1920, 1080, "Ohrogon Engine", nullptr, nullptr);
 
+    Game::CreateInstance(window);
+
   if (window == nullptr) {
     glfwTerminate();
     return -2;
   }
-
-  glfwMakeContextCurrent(window);
 
   if (ogl_LoadFunctions() == ogl_LOAD_FAILED) {
     glfwDestroyWindow(window);
@@ -80,7 +61,6 @@ int main() {
     return -3;
   }
 
-  // glfwSetWindowFocusCallback(window, window_focus_callback);
 
   auto major = ogl_GetMajorVersion();
   auto minor = ogl_GetMinorVersion();
@@ -94,28 +74,6 @@ int main() {
   // turn VSync off
   // glfwSwapInterval(0);
 
-  // Key Manager Initialization
-  Keyboard::RegisterKeyboard(window);
-
-  // Mouse Configuration Options
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  if (glfwRawMouseMotionSupported())
-    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-  // Mouse Initialization
-  Mouse::RegisterMouse(window);
-  //{
-  //	int x, y;
-  //	int width, height;
-  //	glfwGetWindowSize(window, &width, &height);
-  //	glfwGetWindowPos(window, &x, &y);
-  //	Window::Position.x = x;
-  //	Window::Position.y = y;
-  //	Window::Width = width;
-  //	Window::Height = height;
-  //	Window::aspectRatio = ((float)width / height);
-  //}
-
   Shader shader = Shader();
 
   uint VertShader =
@@ -125,71 +83,23 @@ int main() {
 
   shader.CompileShader();
 
-  // Shader shader2 = Shader();
+  Object* test1 = new Object();
 
-  // shader2.CompileShader({ VertShader, FragShader })
-    Object test1 = Object();
 
-  Mesh sphere = Primitive::Sphere(20, 20);
-  sphere.RecalculateNormals();
-  Mesh prim = ModelLoader::LoadObj("./data/Objects/Orb/Orb.obj");
+  Mesh prim = Primitive::Sphere(20, 20);
   prim.RecalculateNormals();
 
-  prim.transform.Scale = Vector3(5.0f);
-  sphere.transform.Scale = Vector3(5.0f);
-  sphere.transform.Position = Vector3(0.0f, 0.0f, 10.0f);
-  // prim.RecalculateNormals();
+  prim.transform.Scale = Vector3(.1f);
+  prim.transform.Position = Vector3(.0f, .0f, -.2f);
 
-  // prim.RecalculateNormals();
+  Camera cam;
 
-  //prim.transform.Position = Vector3::forward() * -10.0f;
-  // prim.FlatShade();
-  // prim.SetIndices(prim.Indices);
+  cam.fov = 1.207f;
+  cam.aspectRatio = 16 / 9.0f;
+  cam.NearPlane = 0.01f;
+  cam.FarPlane = 100000.0f;
+  cam.type = CameraType::Orthographic;
 
-  // Mesh plane = Primitive::Plane(1);
-  // Mesh cylinder = Primitive::Cylinder(20);
-  // Mesh prim = Primitive::Cube();
-  uint texture, texture1;
-  {
-    int width, height, nrChannels;
-    unsigned char *imageData =
-        stbi_load("./data/Objects/Orb/Diffuse.png", &width, &height, &nrChannels, 0);
-
-    if (!imageData) throw "Couldnt Find Image";
-
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
-    glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels,
-                GL_UNSIGNED_BYTE, imageData);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(imageData);
-  }
-  {
-    int width, height, nrChannels;
-    unsigned char *imageData =
-        stbi_load("./data/Objects/Orb/Normal.png", &width, &height, &nrChannels, 0);
-
-    if (!imageData) throw "Couldnt Find Image";
-
-    glGenTextures(1, &texture1);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    int Channels = nrChannels == 3 ? GL_RGB : GL_RGBA;
-    glTexImage2D(GL_TEXTURE_2D, 0, Channels, width, height, 0, Channels, GL_UNSIGNED_BYTE, imageData);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(imageData);
-  }
-
-
-  bool Wireframe = false;
-
-  bool FlatShaded = false;
 
   glUseProgram(shader.ProgrammID);
 
@@ -207,14 +117,6 @@ int main() {
   // Then bind the uniform samplers to texture units:
   glUniform1i(diffuseUniform, 0);
   glUniform1i(normalUniform,  1);
-
-  Camera cam;
-
-  cam.fov = 1.207f;
-  cam.aspectRatio = 16 / 9.0f;
-  cam.NearPlane = 0.01f;
-  cam.FarPlane = 100000.0f;
-
   float f = 0.0f;
   Vector2 camRotation(0.0f, 0.0f);
 
@@ -223,9 +125,7 @@ int main() {
   glCullFace(GL_BACK);
   glPolygonMode(GL_FRONT, GL_FILL);
 
-  while (glfwWindowShouldClose(window) == false &&
-         !(Keyboard::AltKey() && Keyboard::ShiftKey() &&
-           Keyboard::GetKeyDown(KeyCode::DELETE_Key))) {
+  while (glfwWindowShouldClose(window) == false) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwPollEvents();
     Keyboard::Update();
@@ -237,15 +137,15 @@ int main() {
 
     Vector3 movement;
 
-    if (Keyboard::GetKey(KeyCode::W)) movement += up * 0.1;
+    if (Keyboard::GetKey(KeyCode::W)) movement += up;
 
-    if (Keyboard::GetKey(KeyCode::S)) movement += -up * 0.1;
+    if (Keyboard::GetKey(KeyCode::S)) movement += -up;
 
-    if (Keyboard::GetKey(KeyCode::D)) movement += -right * 0.1;
+    if (Keyboard::GetKey(KeyCode::D)) movement += right;
 
-    if (Keyboard::GetKey(KeyCode::A)) movement += right * 0.1;
+    if (Keyboard::GetKey(KeyCode::A)) movement += -right;
 
-    cam.transform.Position += movement * Time::OneTime;
+    cam.transform.Position += movement * (float)Time::DeltaTime * 10.0f;
 
     if(Keyboard::GetKeyDown(KeyCode::F5))
       shader.Reload();
@@ -266,21 +166,23 @@ int main() {
 
     prim.transform.Rotation = Quaternion::euler(0, Time::TotalTime /  Math::PI(), 0);
 
-    {
-      diffuseUniform = glGetUniformLocation(shader.ProgrammID, "DiffuseTexture");
-      // Then bind the uniform samplers to texture units:
-      glUniform1i(diffuseUniform, 0);
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, texture);
-    }
+    // {
+    //   diffuseUniform = glGetUniformLocation(shader.ProgrammID, "DiffuseTexture");
+    //   // Then bind the uniform samplers to texture units:
+    //   glUniform1i(diffuseUniform, 0);
+    //   glActiveTexture(GL_TEXTURE0);
+    //   glBindTexture(GL_TEXTURE_2D, texture);
+    // }
 
-    sphere.draw(MVPMatrixUniform, ModelMatrixUniform, pv_M);
+    //sphere.draw(MVPMatrixUniform, ModelMatrixUniform, pv_M);
     prim.draw(MVPMatrixUniform, ModelMatrixUniform, pv_M);
     
     glfwSwapBuffers(window);
 
     Mouse::Update();
   }
+
+  Game::DestroyInstance();
 
   _CrtDumpMemoryLeaks();
 

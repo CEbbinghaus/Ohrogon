@@ -14,3 +14,5 @@ public:
         return hash(std::string(identifier)) == hash(std::string(other.identifier));
     }
 };
+
+std::hash<std::string> Symbol::hash = std::hash<std::string>();

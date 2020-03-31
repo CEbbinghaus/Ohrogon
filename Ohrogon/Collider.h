@@ -1,37 +1,58 @@
 #pragma once
 #include "Component.h"
 
-class ColliderManager;
+class Collider;
 
-class Collider : Component{
+class ColliderManager: ComponentManager{
+	friend Collider;
 
-	Symbol _IDENTIFIER() override{
+	static ColliderManager* ManagerInstance;
+
+	ColliderManager(){}
+
+	static ComponentManager* GetInstance(){
+		if(ManagerInstance != nullptr)return ManagerInstance;
+		ManagerInstance = new ColliderManager();
+		return ManagerInstance;
+	}
+public:
+
+	void Setup(){}
+
+	void Execute();
+
+	void Register(Component* component);
+	void DeRegister(Component* component);
+
+	void Destroy(){}
+};
+
+class Collider : public Component{
+public:
+	Collider(GameObject* gm): Component(gm){}
+
+	static Symbol Type(){
+		return Symbol("Component.Collider");
+	}
+	Symbol InstanceType() override{
 		return Symbol("Component.Collider");
 	}
 
-	ComponentManager* CreateManager() override{
+	ComponentManager* GetManager() override{
 		return ColliderManager::GetInstance();
 	}
 };
 
-class ColliderManager: ComponentManager{
-	friend Collider;
-	static ColliderManager* ManagerInstance;
-	ColliderManager(){}
-public:
-	static ColliderManager* GetInstance(){
-		if(ManagerInstance != nullptr)return ManagerInstance;
-		ManagerInstance = new ColliderManager();
-	}
+void ColliderManager::Register(Component* component){
+	
+}
 
-	void Setup(){}
+void ColliderManager::DeRegister(Component* component){
 
-	void Execute(){}
+}
 
-	void Register(Component* component){}
-	void DeRegister(Component* component){}
+void ColliderManager::Execute(){
 
-	void Destroy(){}
-};
+}
 
 ColliderManager* ColliderManager::ManagerInstance = nullptr;
