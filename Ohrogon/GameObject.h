@@ -4,6 +4,7 @@
 #include <atyp_Array.h>
 #include "Component.h"
 #include "Game.h"
+#include "Console.h"
 
 class GameObject{
     friend Game;
@@ -14,7 +15,7 @@ class GameObject{
     GameObject* gameObject;
 
     GameObject(): gameObject(this){
-        printf("GameObect Constructor\n");
+        Console::Log(String::format("Constructing GameObect. Adress: %X", (uint64_t)this));
         //components = Array<Component*>();
         Game::AddObject(this);
     }
@@ -40,7 +41,7 @@ class GameObject{
     
   public:
     virtual ~GameObject(){
-        printf("GameObject Destructor Called\n");
+        Console::Error("Deconstructing GameObject");
         // for(Component* component : components){
         //     component->DeRegister();
         //     delete component;

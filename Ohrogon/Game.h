@@ -6,6 +6,7 @@
 #include <atyp_Array.h>
 #include <type_traits>
 #include "Component.h"
+#include "Console.h"
 
 class ComponentManager;
 class GameObject;
@@ -21,6 +22,7 @@ class Game{
     bool active = true;
 
     Game(GLFWwindow* w): window(w){
+        Console::Log(String::format("Constructing Game. Adress: %X", (uint64_t)this));
         managers = Array<ComponentManager*>();
         objects = Array<GameObject*>();
         glfwMakeContextCurrent(window);
@@ -28,22 +30,12 @@ class Game{
         Mouse::RegisterMouse(window);
     }
 
-    ~Game(){
-        for (GameObject* object : objects) {
-            delete object;
-        }
-
-        objects.clear();
-
-        for(ComponentManager* manager : managers){
-            manager->Destroy();
-            delete manager;
-        }
-    }
+    ~Game();
 
     static void AddObject(GameObject* object){
         if(instance == nullptr)return;
 
+        Console::Log("Adding Game Object to Game");
         instance->objects.push(object);
 
         return;
@@ -125,3 +117,23 @@ public:
 
 
 Game* Game::instance = nullptr;
+
+#include "GameObject.h"
+
+Game::~Game(){
+    Console::Log("Deconstructing Game");
+    Console::Log(String::format("Deconstructing %i GameObjects", objects.length));
+    for (GameObject* object : objects) {
+        Console::Log(String::format("Calling delete. adress of object: %X", (uint64_t)object));
+        delete object;//->~GameObject();
+    }
+    objects.clear();
+
+
+    Console::Log(String::format("Deconstructing %i Managers", objects.length));
+    for(ComponentManager* manager : managers){
+        manager->Destroy();
+        delete manager;
+    }
+    managers.clear();
+}

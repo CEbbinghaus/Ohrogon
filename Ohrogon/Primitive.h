@@ -9,7 +9,7 @@ class Primitive {
   public:
 	static struct{
 		static MeshData Plane(uint faces){
-			Array verts = Array<Vector3>((faces + 1) * (faces + 1));
+			Array<Vector3> verts = Array<Vector3>((faces + 1) * (faces + 1));
 
 			for(int x = 0; x <= faces; ++x){
 				for(int y = 0; y <= faces; ++y){
