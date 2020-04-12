@@ -67,10 +67,6 @@ int main() {
   printf("Running OpenGL Version %i.%i\n", major, minor);
 
   stbi_set_flip_vertically_on_load(true);
-
-  Console::Error("This is a Error");
-  Console::Warning("This is a Warning");
-  Console::Log("This is a Log");
   // turn VSync off
   // glfwSwapInterval(0);
 

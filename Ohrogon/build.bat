@@ -1,0 +1,2 @@
+call vcvarsall x64
+cl /I.\Dependencies\atyp\ /I.\Dependencies\glcore\ /I.\Dependencies\glfw\includes\ /I.\Dependencies\stbi\ /MDd main.cpp ./Dependencies/glcore/gl_core_4_5.c opengl32.lib glfw3.lib /link /LIBPATH:.\Dependencies\glfw\
