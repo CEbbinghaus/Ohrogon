@@ -12,9 +12,8 @@ uint HighestBindIndex = 0;
 template <
     typename T,
     class = typename std::enable_if_t<std::is_class_v<T>, T>>
-class StructBuffer : public T
-{
-private:
+class StructBuffer : public T{
+  private:
     struct Variable
     {
         uint size;
@@ -68,7 +67,7 @@ private:
         return;
      }
 
-protected:
+  protected:
     StructBuffer(uint ShaderProgram, const char *name, bool instanced = false) : name(name){
         glGetError();
 
@@ -140,7 +139,7 @@ protected:
         memoryCounter = offset;
     }
 
-public:
+  public:
     void Bind()
     {
         for (int i = 0; i < variables.length; ++i)
@@ -239,6 +238,9 @@ class ArrayStructBuffer {
 
             glGenBuffers(1, &buffer);
 
+            if(data != nullptr)
+                free(data);
+
             data = malloc(parent->dataSize);
         }
 
@@ -246,6 +248,7 @@ class ArrayStructBuffer {
             glDeleteBuffers(1, &buffer);
             if (data != nullptr)
                 free(data);
+            data = nullptr;
         }
 
         void Bind() {
