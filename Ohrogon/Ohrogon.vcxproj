@@ -170,6 +170,8 @@
   <ItemGroup>
     <ClCompile Include="Dependencies\glcore\gl_core_4_5.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayStructBuffer.h" />

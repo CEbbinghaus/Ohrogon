@@ -4,7 +4,6 @@
 #include <atyp_Vector3.h>
 #include <gl_core_4_5.h>
 
-
 using uint = unsigned int;
 
 struct MeshData {

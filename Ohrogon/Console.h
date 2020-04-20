@@ -7,6 +7,8 @@
     #include <windows.h>
 #endif
 
+#ifndef __Console
+
 #define RED "\033[1;31m"
 #define BLUE "\033[38;5;39m"
 #define CYAN "\033[1;36m"
@@ -67,3 +69,5 @@ int Console::statusCode = Console::init();
 #undef YELLOW
 #undef TESTING
 #undef Nothing
+#endif
+#define __Console
