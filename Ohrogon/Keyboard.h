@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <memory>
 
+#ifndef __Keyboard
+
 enum class KeyCode : int {
 	UNKNOWN = GLFW_KEY_UNKNOWN,
 	SPACE = GLFW_KEY_SPACE,
@@ -252,3 +254,6 @@ bool Keyboard::shiftKey = false;
 bool Keyboard::altKey = false;
 
 GLFWwindow* Keyboard::window = nullptr;
+
+#endif
+#define __Keyboard

@@ -3,6 +3,8 @@
 #include <glfw3.h>
 #include <cstdio>
 
+#ifndef __Mouse
+
 class MouseCallbackHelper;
 
 class Mouse{
@@ -48,3 +50,5 @@ public:
 GLFWwindow* Mouse::window = nullptr;
 Vector2 Mouse::pos = Vector2::zero();
 Vector2 Mouse::delta = Vector2::zero();
+#endif
+#define __Mouse

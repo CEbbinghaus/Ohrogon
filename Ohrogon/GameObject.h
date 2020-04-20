@@ -4,7 +4,6 @@
 #include <atyp_Array.h>
 #include "Component.h"
 #include "Game.h"
-#include "Console.h"
 
 class GameObject{
     friend Game;
@@ -14,39 +13,19 @@ class GameObject{
   protected:
     GameObject* gameObject;
 
-    GameObject(): gameObject(this){
-        Console::Log(String::format("Constructing GameObect. Adress: %X", (uint64_t)this));
-        //components = Array<Component*>();
-        Game::AddObject(this);
-    }
+    GameObject();
 
-    GameObject(const GameObject& original){
-        printf("GameObject Copy Constructor\n");
-    }
+    GameObject(const GameObject& original);
   
-    GameObject(const GameObject&& original){
-        printf("GameObject MoveConstructor Constructor\n");
-    }
+    GameObject(const GameObject&& original);
     
-    GameObject& operator =(const GameObject& other){
-        printf("GameObject Copy Assignment\n");
-        return *this;
-    }
+    GameObject& operator =(const GameObject& other);
 
-    GameObject& operator =(const GameObject&& other){
-        printf("GameObject Move Assignment\n");
-        return *this;
-    }
+    GameObject& operator =(const GameObject&& other);
 
     
   public:
-    virtual ~GameObject(){
-        Console::Error("Deconstructing GameObject");
-        // for(Component* component : components){
-        //     component->DeRegister();
-        //     delete component;
-        // }
-    }
+    virtual ~GameObject();
 
     Transform transform;
 
@@ -85,15 +64,11 @@ class GameObject{
         return nullptr;
     }
 
-    bool IsActive(){
-        return active;
-    }
+    bool IsActive();
 
-    void SetActive(bool value){
-        active = value;
-    }
+    void SetActive(bool value);
 
-    virtual void Awake(){}
-    virtual void Update(){}
-    virtual void Destroy(){}
+    virtual void Awake();
+    virtual void Update();
+    virtual void Destroy();
 };

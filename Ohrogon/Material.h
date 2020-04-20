@@ -1,6 +1,6 @@
 #pragma once
 #include <atyp_Vector3.h>
-#include "gl_core_4_5.h"
+#include <gl_core_4_5.h>
 #include "StructBuffer.h"
 
 using uint = unsigned int;
