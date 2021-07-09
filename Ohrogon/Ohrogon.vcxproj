@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>__TMP\$(Configuration)\</IntDir>
+    <IntDir>_TMP\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
     <OutDir>$(ProjectDir)Build\$(Configuration)\</OutDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -79,12 +79,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)Build\$(Configuration)\</OutDir>
-    <IntDir>__TMP\$(Configuration)\</IntDir>
+    <IntDir>_TMP\$(Configuration)\</IntDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>__TMP\$(Configuration)\</IntDir>
+    <IntDir>_TMP\$(Configuration)\</IntDir>
     <OutDir>$(ProjectDir)Build\$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)</TargetName>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -92,7 +92,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)Build\$(Configuration)\</OutDir>
-    <IntDir>__TMP\$(Configuration)\</IntDir>
+    <IntDir>_TMP\$(Configuration)\</IntDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
