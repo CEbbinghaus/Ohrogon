@@ -27,10 +27,13 @@ public:
 	}
 
 	Matrix4 getProjectionMatrix(){
-		if(type == CameraType::Perspective)
-			return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
-		if(type == CameraType::Orthographic)
-			return Matrix4::Orthographic(fov * 10, fov * 10 * aspectRatio, NearPlane, FarPlane);
+		switch(type){
+			case CameraType::Orthographic:
+				return Matrix4::Orthographic(fov * 10, fov * 10 * aspectRatio, NearPlane, FarPlane);
+			case CameraType::Perspective:
+				return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
+		}
+		throw "Camera Type does not exist";
 	}
 
 	Matrix4 getPVMatrix(){

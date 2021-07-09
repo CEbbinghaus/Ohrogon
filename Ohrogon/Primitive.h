@@ -205,7 +205,7 @@ public:
 			return mesh;
 		}
 	
-		static MeshData Icosahedon(int refinement){
+		static MeshData Icosahedron(int refinement){
 			
 			MeshData mesh;
 			Array<Vector3>& vertices = mesh.Vertices;
@@ -302,7 +302,7 @@ public:
 	}
 	
 	static Mesh Icosahedron(int faces){
-		MeshData data = raw.Icosahedon(faces);
+		MeshData data = raw.Icosahedron(faces);
 		Mesh m = Mesh();
 		m.SetVertices(data.Vertices);
 		m.SetIndices(data.Indices);
