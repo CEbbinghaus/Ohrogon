@@ -31,6 +31,7 @@ public:
 			return Matrix4::Projection(fov, aspectRatio, NearPlane, FarPlane);
 		if(type == CameraType::Orthographic)
 			return Matrix4::Orthographic(fov * 10, fov * 10 * aspectRatio, NearPlane, FarPlane);
+		return Matrix4();
 	}
 
 	Matrix4 getPVMatrix(){
