@@ -1,4 +1,4 @@
-[submodule "src/dependencies/atyp"]
-	path = src/dependencies/atyp
+[submodule "lib/atyp"]
+	path = lib/atyp
 	url = ../StandardLibary
 	branch = master

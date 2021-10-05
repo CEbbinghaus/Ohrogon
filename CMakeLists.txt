@@ -18,18 +18,18 @@ file(COPY src/data/ DESTINATION data)
 # link_libraries(${OPENGL_LIBRARIES})
 
 add_library(Glad 
-	src/dependencies/glad/src/glad.c
+	lib/glad/src/glad.c
 )
 
-target_include_directories(Glad PUBLIC src/dependencies/glad/include)
+target_include_directories(Glad PUBLIC lib/glad/include)
 
-include_directories(src/dependencies/glad/include/glad)
-include_directories(src/dependencies/atyp)
-# include_directories(src/dependencies/glcore)
-include_directories(src/dependencies/glfw/includes)
-include_directories(src/dependencies/stbi)
+include_directories(lib/glad/include/glad)
+include_directories(lib/atyp)
+# include_directories(lib/glcore)
+include_directories(lib/glfw/includes)
+include_directories(lib/stbi)
 
-link_directories(src/dependencies/glfw/)
+link_directories(lib/glfw/)
 
 link_libraries(glfw3.lib)
 
@@ -39,6 +39,6 @@ add_executable(Main ${SourceFiles} ${SourceHeaders})
 
 target_link_libraries(Main Glad)
 
-# target_include_directories(Main PUBLIC src/dependencies/glfw/include/)
-# target_link_libraries(Main -Lsrc/dependencies/glfw/)
+# target_include_directories(Main PUBLIC lib/glfw/include/)
+# target_link_libraries(Main -Llib/glfw/)
 # target_link_libraries(Main glfw.lib)
