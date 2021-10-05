@@ -1,4 +1,4 @@
-[submodule "Ohrogon/Dependencies/atyp"]
-	path = Ohrogon/Dependencies/atyp
+[submodule "src/dependencies/atyp"]
+	path = src/dependencies/atyp
 	url = ../StandardLibary
 	branch = master
