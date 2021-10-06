@@ -2,7 +2,7 @@
 
 #include "Symbol.h"
 #include "Game.h"
-#include "String.h"
+#include "atyp_String.h"
 
 class ComponentManager;
 

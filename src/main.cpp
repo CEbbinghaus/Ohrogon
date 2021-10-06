@@ -25,15 +25,15 @@
 #include "PointLights.h"
 #include "Primitive.h"
 #include "Shader.h"
-#include "String.h"
+#include "atyp_String.h"
 #include "Time.h"
 #include "Window.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
 
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
+// #define _CRTDBG_MAP_ALLOC
+// #include <crtdbg.h>
 
 #include <cstdlib>
 
@@ -60,8 +60,7 @@ using Clock = std::chrono::steady_clock;
 
 int main() {
   try {
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
+#if defined _DEBUG && defined _CRTDBG_MAP_ALLOC
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
@@ -360,7 +359,9 @@ int main() {
       Mouse::Update();
     }
 
+#if defined _DEBUG && defined _CRTDBG_MAP_ALLOC
     _CrtDumpMemoryLeaks();
+#endif
 
     glfwDestroyWindow(window);
     glfwTerminate();
