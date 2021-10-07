@@ -44,7 +44,7 @@ private:
         glGetActiveUniformBlockiv(ProgramID, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &dataSize);
 
         glUniformBlockBinding(ProgramID, blockIndex, bindIndex);
-        
+
         // glGetActiveUniformBlockiv(ProgramID,
         //     blockIndex,
         //     GL_UNIFORM_BLOCK_BINDING,
@@ -93,9 +93,9 @@ private:
     }
 
     /* Specify<T>(const char* name)
-     *  
+     *
      * template:
-     *      T = The Type of the Variable 
+     *      T = The Type of the Variable
      * Args:
      *      name - Name of Variable in Shader
      */
@@ -104,7 +104,7 @@ private:
     {
 
         std::string finalName = isInstanced ? std::string(this->name) + std::string(".") + std::string(name) : std::string(name);
-        
+
 
         uint index, offset;
         GetDataLocation(finalName.c_str(), index, offset);
@@ -115,10 +115,10 @@ private:
     }
 
     /* Specify<T>(const char* name, void* location)
-     *  
+     *
      * template:
-     *      T = The Type of the Variable 
-     * 
+     *      T = The Type of the Variable
+     *
      * Args:
      *      name - Name of Variable in Shader
      *      location - location of the Variable
@@ -172,7 +172,7 @@ class ArrayStructBuffer {
         uint location;
     };
     Array<Variable> variables;
-    uint memoryOffset;
+    uint memoryOffset = 0;
 
     uint ProgramID;
     const char* name;
@@ -227,7 +227,7 @@ class ArrayStructBuffer {
 
         void Initialize(uint index) {
             //glDeleteBuffers(1, &buffer);
-            
+
             this->bindIndex = HighestBindIndex++;
 
             String location = String::format("%s[%i]", parent->name, index);
@@ -312,10 +312,10 @@ class ArrayStructBuffer {
     }
 
     /* Specify<T>(const char* name, void* location)
-     *  
+     *
      * template:
-     *      T = The Type of the Variable 
-     * 
+     *      T = The Type of the Variable
+     *
      * Args:
      *      name - Name of Variable in Shader
      *      location - location of the Variable

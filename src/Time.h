@@ -14,17 +14,18 @@ public:
 
 	static void Update() {
 		double currentTime = glfwGetTime();
+		// Console::Debug(String::format("Current Time: %d", currentTime));
 		double amount = currentTime - lastTime;
 
 		UnscaledDeltaTime = amount;
 
 		DeltaTime = amount * TimeScale;
 		OneTime = DeltaTime * 60;
-		
-		
+
+
 		TotalTime += amount;
 		ScaledTime += amount * TimeScale;
-		
+
 		lastTime = currentTime;
 	}
 };

@@ -58,6 +58,12 @@ class Console{
     }
   public:
 
+    static void Debug(const String& message){
+    	printf((String::format("%sDEBUG:%s ", GREEN, Nothing) + message) + "\n");
+    }
+    static void Info(const String& message){
+        printf("Info: " + message + "\n");
+    }
     static void Log(const String& message){
         printf((String::format("%sLog:%s ", BLUE, Nothing) + message) + "\n");
     }
@@ -68,6 +74,9 @@ class Console{
 
     static void Error(const String& message){
         printf((String::format("%sError:%s ", RED, Nothing) + message) + "\n");
+    }
+    static void Critical(const String& message){
+        printf((String::format("%sCritical:%s ", RED, Nothing) + message) + "\n");
     }
 };
 

@@ -25,9 +25,9 @@
 #include "PointLights.h"
 #include "Primitive.h"
 #include "Shader.h"
-#include "atyp_String.h"
 #include "Time.h"
 #include "Window.h"
+#include "atyp_String.h"
 
 using uint = unsigned int;
 using Clock = std::chrono::steady_clock;
@@ -63,6 +63,30 @@ int main() {
 #if defined _DEBUG && defined _CRTDBG_MAP_ALLOC
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
+
+    const char *fileName = "data/Shaders/VertShader.vert";
+    // char ch;
+    // FILE *fp;
+
+    // printf("Enter name of a file you wish to see\n");
+
+    //     fp = fopen(fileName, "r");  // read mode
+
+    //     if (fp == NULL) {
+    // 	perror("Error while opening the file.\n");
+    // 	exit(EXIT_FAILURE);
+    // }
+
+    // printf("The contents of %s file are:\n", fileName);
+
+    // while ((ch = fgetc(fp)) != EOF)
+    // 	printf("%c", ch);
+
+    // printf(File::ReadTextAlt(fileName));
+
+    // fclose(fp);
+
+    // printf(File::ReadText(fileName));
 
     if (glfwInit() == false) return -1;
 
@@ -122,9 +146,9 @@ int main() {
     Shader shader = Shader();
 
     uint VertShader =
-        shader.LoadShader("./data/Shaders/VertShader.vert", ShaderType::Vertex);
+        shader.LoadShader("../data/Shaders/VertShader.vert", ShaderType::Vertex);
     uint FragShader =
-        shader.LoadShader("./data/Shaders/FragShader.frag", ShaderType::Frag);
+        shader.LoadShader("../data/Shaders/FragShader.frag", ShaderType::Frag);
 
     shader.CompileShader();
 
@@ -135,7 +159,7 @@ int main() {
 
     Mesh sphere = Primitive::Sphere(20, 20);
     sphere.RecalculateNormals();
-    Mesh prim = ModelLoader::LoadObj("./data/Objects/Orb/Orb.obj");
+    Mesh prim = ModelLoader::LoadObj("../data/Objects/Orb/Orb.obj");
     Console::Log(String::format("Loaded %d Verticies from Orb mesh.",
                                 prim.Vertices.length));
     prim.RecalculateNormals();
@@ -157,7 +181,7 @@ int main() {
     uint texture, texture1;
     {
       int width, height, nrChannels;
-      unsigned char *imageData = stbi_load("./data/Objects/Orb/Diffuse.png",
+      unsigned char *imageData = stbi_load("../data/Objects/Orb/Diffuse.png",
                                            &width, &height, &nrChannels, 0);
 
       if (!imageData) throw "Couldnt Find Image";
@@ -175,7 +199,7 @@ int main() {
     }
     {
       int width, height, nrChannels;
-      unsigned char *imageData = stbi_load("./data/Objects/Orb/Normal.png",
+      unsigned char *imageData = stbi_load("../data/Objects/Orb/Normal.png",
                                            &width, &height, &nrChannels, 0);
 
       if (!imageData) throw "Couldnt Find Image";
@@ -195,15 +219,17 @@ int main() {
     Material m = Material(shader.ProgrammID);
 
     DirectionLights dirLights = DirectionLights(shader, 4);
-    dirLights.length = 2.0f;
-    dirLights[0].direction = Vector3::right();
-    dirLights[0].intensity = 1.0f;
-    dirLights[1].direction = -Vector3::up();
-    dirLights[1].color = Vector3(1.0f, 1.0f, 1.0f);
-    dirLights[1].intensity = .7f;
+    dirLights.length = 1;
+    // dirLights[0].direction = Vector3::right();
+    // dirLights[0].intensity = 1.0f;
+
+    dirLights[0].direction = -Vector3::up();
+    dirLights[0].color = Vector3(1.0f, 1.0f, 1.0f);
+    dirLights[0].intensity = .7f;
 
     PointLights ptLights = PointLights(shader, 8);
     ptLights.length = 1;
+
     ptLights[0].color = Vector3::one();
     ptLights[0].intensity = 1.0f;
     ptLights[0].position = Vector3(5.0f, 0.0f, 1.0f);
@@ -367,7 +393,8 @@ int main() {
     glfwTerminate();
     return 0;
   } catch (const char *message) {
-    Console::Error(String::format("Critical Application Exception:\n%s", message));
-	 return 1;
+    Console::Error(
+        String::format("Critical Application Exception:\n	%s", message));
+    return 1;
   }
 }

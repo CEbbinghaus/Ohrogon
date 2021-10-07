@@ -2,10 +2,13 @@ root = true
 
 [**]
 end_of_line = lf
-charset = utf-8
+
+[**.{frag,fragment,vert,vertex,shader}]
+charset = latin1
 
 
 [**.{c,cpp,h}]
+charset = utf-8
 indent_size = 4
 indent_style = tab
 insert_final_newline = true

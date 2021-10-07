@@ -15,6 +15,5 @@ public:
         Specify<Vector3>("color");
         Specify<float>("intensity");
         Specify<Vector3>("direction");
-        length = 0;
     }
 };

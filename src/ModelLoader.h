@@ -10,7 +10,7 @@
 #define check(condition, text) \
   if (!condition) throw text
 #else
-#define check(condition, text) continue
+#define check(condition, text)
 #endif
 
 class ModelLoader {

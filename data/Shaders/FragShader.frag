@@ -77,6 +77,7 @@ LightData DirectionLightColor(vec3 NormalDirection){
 
 LightData PointLightColor(vec3 NormalDirection){
   LightData data = LightData(vec3(0), vec3(0));
+
   for(int i = 0; i < PointLightCount; ++i){
     
     //calculate the vector from this pixels surface to the light source
@@ -136,7 +137,7 @@ void main(){
   // vec3 diffuse = mat.Id * mat.Kd  * lambertTerm;
   // vec3 specular = mat.Is * mat.Ks * specularTerm;
 
-  FragColor = vec4((Diffuse + ambient) * texCol.xyz + Specular, 1);// + 0.0001 * vec4((texCol.xyz * clamp(ambient + diffuse, 0, 1)) + specular, 1);
+  FragColor = vec4((texCol.xyz * clamp(ambient + Diffuse, 0, 1)) + Specular, 1);
 }
 
 

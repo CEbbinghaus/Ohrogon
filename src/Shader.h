@@ -1,11 +1,13 @@
 #pragma once
-#include <glad.h>
 #include <atyp_Array.h>
+#include <glad.h>
+
+#include <map>
 
 #include "File.h"
+
 //#include <assert.h>
 
-using string = std::string;
 using uint = unsigned int;
 
 
@@ -13,6 +15,17 @@ enum class ShaderType: int {
 	Vertex = GL_VERTEX_SHADER,
 	Frag = GL_FRAGMENT_SHADER
 };
+
+const char* ShaderName(ShaderType type){
+	switch(type){
+		case ShaderType::Vertex:
+			return "Vertex";
+		case ShaderType::Frag:
+			return "Fragment";
+		default:
+			return nullptr;
+	}
+}
 
 class Shader{
 	class src{
@@ -22,13 +35,15 @@ class Shader{
 		ShaderType type;
 
 		src(const char* path, ShaderType type): file(path), type(type){
-			auto data = File::ReadText(path);
+			auto data = File::ReadTextCStr(path);
+			Console::Debug(String::format("Compiling %s Shader from %s", ShaderName(type), path));
 			id = CompileSource(data, (int)type);
 		}
 
 		void Recompile(){
 			glDeleteShader(id);
-			id = CompileSource(File::ReadText(file), (int)type);
+			id = CompileSource(File::ReadTextCStr(file), (int)type);
+			Console::Debug(String::format("ReCompiling %s Shader from %s", ShaderName(type), file));
 		}
 	};
 
@@ -37,11 +52,10 @@ class Shader{
 	Array<uint> sourceIDs;
 	Array<uint> compiledIDs;
 
-	static uint CompileSource(const String& data, GLint flag) {
-		const char* dataSrc = data;
+	static uint CompileSource(const char* data, GLint flag) {
 		uint id = glCreateShader(flag);
 
-		glShaderSource(id, 1, (const GLchar**)&dataSrc, 0);
+		glShaderSource(id, 1, &data, nullptr);
 		glCompileShader(id);
 
 		GLint success = GL_FALSE;
@@ -59,7 +73,7 @@ class Shader{
 			Console::Error(String::format("Error Compiling Shader: %s", errorLog));
 			free(errorLog);
 
-			printf(dataSrc);
+			// printf(dataSrc);
 
 			// Provide the infolog in whatever manor you deem best.
 			// Exit with failure.
